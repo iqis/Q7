@@ -35,6 +35,7 @@ Welcome! `object` provides the following:
   - use `.my` to refer to self (optional)
   - Composition is better than Inheritance
   - Deep copy by default
+  - post-hoc `$.implement()` too add more things
 
 - Unlocked environment/binding
   - Each object is an environment
@@ -113,16 +114,13 @@ max$poop()
 ```
 
 ```{r}
-archie <- object::type(function(name = "Archie", race = "W") NULL )()
+archie <- object::type(function(name = "Archie", race = "W") {
+  animal_traits()
+})()
 ```
 
-```{r}
-Map(function(obj) obj$.implement(animal_traits()), 
-    list(walter, archie))
-```
 
 ```{r}
-walter$eat()
 archie$poop()
 ```
 
