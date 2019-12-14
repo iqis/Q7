@@ -6,7 +6,7 @@
 #' @export
 #'
 #' @examples
-obj <- function(fn){
+object <- function(fn){
         fn_body <- deparse(body(fn))
         body(fn) <-
             parse(text = c("{",
