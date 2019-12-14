@@ -23,7 +23,7 @@ Welcome\! `object` provides the following:
       - use `.my` to refer to self (optional)
       - Composition is better than Inheritance
       - Deep copy by default
-      - post-hoc `$.implement()` too add more things
+      - post-hoc `$.do()` too add more things
   - Unlocked environment/binding
       - Each object is an environment
       - add, remove, change items in an object freely as you please
@@ -51,7 +51,7 @@ dog <- object::type(function(name, breed){
 ``` r
 walter <- dog("Walter", "Husky")
 ls(walter, all.names = TRUE)
-#> [1] ".implement" ".my"        "breed"      "name"       "say"
+#> [1] ".do"   ".my"   "breed" "name"  "say"
 ```
 
 ``` r
@@ -67,7 +67,7 @@ max$say("Wussup Dawg!")
 ```
 
 ``` r
-max$.implement({
+max$.do({
     treats_eaten <- 0
     eat_treat <- function(n = 1){
         cat(paste(name, "eats", n, "treat(s).\n"))
@@ -91,14 +91,14 @@ max$treats_eaten
 ```
 
 ``` r
-animal_traits <- object::feature({
+animal_features <- object::feature({
     mortal <- TRUE
     eat <- function() paste(.my$name, "eats.")
     poop <- function() paste(name, "poops")
 })
 
-max$.implement({
-    animal_traits()
+max$.do({
+    animal_features()
 })
 
 max$eat()
@@ -109,7 +109,7 @@ max$poop()
 
 ``` r
 archie <- object::type(function(name = "Archie", race = "W") {
-  animal_traits()
+  animal_features()
 })()
 ```
 

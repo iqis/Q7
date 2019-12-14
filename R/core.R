@@ -18,7 +18,7 @@ type <- function(fn){
                                         c("{", "}")),
                                 fn_body[2:(length(fn_body) - 1)],
                                 fn_body),
-                           ".implement <- function(expr){
+                           ".do <- function(expr){
                                                   eval(substitute(expr),
                                                        envir = .my)
 
