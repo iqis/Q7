@@ -72,11 +72,12 @@ max$.implement({
         cat(paste(name, "eats", n, "treat(s).\n"))
         treats_eaten <<- treats_eaten + n
     }
-    
 })
 ```
 
 ``` r
+max$eat_treat()
+#> Max eats 1 treat(s).
 max$eat_treat(2)
 #> Max eats 2 treat(s).
 max$eat_treat(3)
@@ -85,7 +86,7 @@ max$eat_treat(3)
 
 ``` r
 max$treats_eaten
-#> [1] 5
+#> [1] 6
 ```
 
 ``` r
@@ -114,11 +115,14 @@ Map(function(obj) obj$.implement(animal_traits()),
     list(walter, archie))
 #> [[1]]
 #> function() paste(name, "poops")
-#> <environment: 0x0000000013b77cd0>
+#> <environment: 0x0000000013b78c60>
 #> 
 #> [[2]]
 #> function() paste(name, "poops")
-#> <environment: 0x0000000012527758>
+#> <environment: 0x0000000012654f48>
+```
+
+``` r
 walter$eat()
 #> [1] "Walter eats."
 archie$poop()

@@ -83,12 +83,12 @@ max$.implement({
         cat(paste(name, "eats", n, "treat(s).\n"))
         treats_eaten <<- treats_eaten + n
     }
-    
 })
 ```
 
 
 ```{r}
+max$eat_treat()
 max$eat_treat(2)
 max$eat_treat(3)
 ```
@@ -96,6 +96,7 @@ max$eat_treat(3)
 ```{r}
 max$treats_eaten
 ```
+
 ```{r}
 animal_traits <- object::feature({
     mortal <- TRUE
@@ -118,6 +119,9 @@ archie <- object::type(function(name = "Archie", race = "W") NULL )()
 ```{r}
 Map(function(obj) obj$.implement(animal_traits()), 
     list(walter, archie))
+```
+
+```{r}
 walter$eat()
 archie$poop()
 ```
