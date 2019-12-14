@@ -1,5 +1,5 @@
-Package: s1
-Title: Minimalistic Classes for Object Oriented Programming
+Package: object
+Title: Freestyle, Minimalistic Classes for Object Oriented Programming
 Version: 0.1.0.9000
 Authors@R: 
    c(person("Siqi", "Zhang", 

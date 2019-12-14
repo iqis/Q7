@@ -1,22 +1,24 @@
-#' Create an Object Generator
+#' Create an Object Type
+#'
+#' This function is a object generator
 #'
 #' @param fn a constructor function
 #'
-#' @return s1::generator, function
+#' @return object::type, function
 #' @export
 #'
 #' @examples
-object <- function(fn){
+type <- function(fn){
         fn_body <- deparse(body(fn))
         body(fn) <-
             parse(text = c("{",
                            ".my <- structure(environment(),
-                                             class = 's1::instance')",
+                                             class = 'object::instance')",
                            `if`(all(fn_body[c(1, length(fn_body))] ==
                                         c("{", "}")),
                                 fn_body[2:(length(fn_body) - 1)],
                                 fn_body),
-                           ".do <- function(expr){
+                           ".implement <- function(expr){
                                                   eval(substitute(expr),
                                                        envir = .my)
 
@@ -26,8 +28,27 @@ object <- function(fn){
                   keep.source = FALSE)
 
         structure(fn,
-                  class = c("s1::generator",
+                  class = c("object::type",
                             class(fn)))
+}
+
+#' Create a Object Feature
+#'
+#' @param expr
+#'
+#' @return
+#' @export
+#'
+#' @examples
+feature <- function(expr){
+    expr <- substitute(expr)
+    function(){
+        `if`(!exists(".my",
+                     envir = parent.frame(),
+                     inherits = FALSE),
+             stop("Must be called inside an object::instance"))
+        eval(expr, envir = parent.frame())
+    }
 }
 
 #' Title
@@ -38,8 +59,8 @@ object <- function(fn){
 #' @export
 #'
 #' @examples
-is_generator <- function(x){
-    inherits(x, "s1::generator")
+is_type <- function(x){
+    inherits(x, "object::type")
 }
 
 #' Title
@@ -51,11 +72,11 @@ is_generator <- function(x){
 #'
 #' @examples
 is_instance <- function(x){
-    inherits(x, "s1::instance")
+    inherits(x, "object::instance")
 }
 
-`print.s1::generator` <- function(x, ...) {
-    cat(paste0("<s1::generator>", "\n"))
+`print.object::type` <- function(x, ...) {
+    cat(paste0("<object::type>", "\n"))
     print(environment(x))
     print.function(unclass(x))
 }
@@ -83,7 +104,7 @@ clone <- function(...){
 #' @export
 #'
 #' @examples
-`clone.s1::instance` <- function(obj, deep = TRUE){
+`clone.object::instance` <- function(obj, deep = TRUE){
     obj_clone <- new.env(parent = parent.env(obj))
     obj_clone$.my <- obj_clone
     names <- setdiff(ls(obj,all.names = TRUE), ".my")
