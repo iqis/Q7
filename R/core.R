@@ -1,10 +1,10 @@
-#' Create an Object Type
+#' Create an foo Type
 #'
 #' This function is a object generator
 #'
 #' @param fn a constructor function
 #'
-#' @return object::type, function
+#' @return foo::type, function
 #' @export
 #'
 #' @examples
@@ -13,7 +13,7 @@ type <- function(fn){
         body(fn) <-
             parse(text = c("{",
                            ".my <- structure(environment(),
-                                             class = 'object::instance')",
+                                             class = 'foo::instance')",
                            `if`(all(fn_body[c(1, length(fn_body))] ==
                                         c("{", "}")),
                                 fn_body[2:(length(fn_body) - 1)],
@@ -28,7 +28,7 @@ type <- function(fn){
                   keep.source = FALSE)
 
         structure(fn,
-                  class = c("object::type",
+                  class = c("foo::type",
                             class(fn)))
 }
 
@@ -46,7 +46,7 @@ feature <- function(expr){
         `if`(!exists(".my",
                      envir = parent.frame(),
                      inherits = FALSE),
-             stop("Must be called inside an object::instance"))
+             stop("Must be called inside an foo::instance"))
         eval(expr, envir = parent.frame())
     }
 }
@@ -60,7 +60,7 @@ feature <- function(expr){
 #'
 #' @examples
 is_type <- function(x){
-    inherits(x, "object::type")
+    inherits(x, "foo::type")
 }
 
 #' Title
@@ -72,11 +72,11 @@ is_type <- function(x){
 #'
 #' @examples
 is_instance <- function(x){
-    inherits(x, "object::instance")
+    inherits(x, "foo::instance")
 }
 
-`print.object::type` <- function(x, ...) {
-    cat(paste0("<object::type>", "\n"))
+`print.foo::type` <- function(x, ...) {
+    cat(paste0("<foo::type>", "\n"))
     print(environment(x))
     print.function(unclass(x))
 }
@@ -104,7 +104,7 @@ clone <- function(...){
 #' @export
 #'
 #' @examples
-`clone.object::instance` <- function(obj, deep = TRUE){
+`clone.foo::instance` <- function(obj, deep = TRUE){
     obj_clone <- new.env(parent = parent.env(obj))
     obj_clone$.my <- obj_clone
     names <- setdiff(ls(obj,all.names = TRUE), ".my")

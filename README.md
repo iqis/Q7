@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# object
+# foo
 
 <!-- badges: start -->
 
@@ -9,19 +9,19 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
-Welcome\! `object` provides the following:
+Welcome\! `foo` provides *Freestyle Object Oriented* Programming
+features:
 
-  - Native R Style
+  - Native R Flavor
       - Everything is familiar
-      - Use `<-` to assign value to bindings as object’s items
+      - Use `<-` to assign value to bindings
   - No Inheritance
+      - No lineage to trace back to
+      - No methods you don’t need
       - No mess
-      - Easy to understand
-      - Not unlike today’s hottest languages: Go & Rust
   - Compostable
       - *Reference Semantics*
       - use `.my` to refer to self (optional)
-      - Composition is better than Inheritance
       - Deep copy by default
       - post-hoc `$.do()` too add more things
   - Unlocked environment/binding
@@ -33,13 +33,13 @@ Welcome\! `object` provides the following:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("iqis/object")
+devtools::install_github("iqis/foo")
 ```
 
 ## Example
 
 ``` r
-dog <- object::type(function(name, breed){
+dog <- foo::type(function(name, breed){
     say <- function(greeting = "Woof!"){
         cat(paste0(greeting, 
                    " I am ", name, ", a ", breed, 
@@ -60,7 +60,7 @@ walter$say()
 ```
 
 ``` r
-max <- object::clone(walter)
+max <- foo::clone(walter)
 max$name <- "Max"
 max$say("Wussup Dawg!")
 #> Wussup Dawg! I am Max, a Husky.
@@ -91,14 +91,14 @@ max$treats_eaten
 ```
 
 ``` r
-animal_features <- object::feature({
+is_animal <- foo::feature({
     mortal <- TRUE
     eat <- function() paste(.my$name, "eats.")
     poop <- function() paste(name, "poops")
 })
 
 max$.do({
-    animal_features()
+    is_animal()
 })
 
 max$eat()
@@ -108,12 +108,43 @@ max$poop()
 ```
 
 ``` r
-archie <- object::type(function(name = "Archie", race = "W") {
-  animal_features()
-})()
+person <- foo::type(function(name, job) {
+  description <- function(){
+    paste(name, "works as a(n)", job)
+  }
+  is_animal()
+})
+archie <- person("Archie", "Analyst")
 ```
 
 ``` r
+archie$description()
+#> [1] "Archie works as a(n) Analyst"
 archie$poop()
 #> [1] "Archie poops"
+```
+
+``` r
+has_collar <- foo::feature({
+  collar <- foo::type(function(material, color){
+    description <- function() {
+      paste("is made of", material, "and in", color)
+    }
+  })
+  
+  take_for_a_walk <- function(){
+    cat(name, "wears a collar that", collar$description(), "\n")
+    cat("We're gonna go out for a walk!")
+  }
+})
+```
+
+``` r
+walter$.do({
+  has_collar()
+  collar <- collar("rubber", "red")
+  })
+walter$take_for_a_walk()
+#> Walter wears a collar that is made of rubber and in red 
+#> We're gonna go out for a walk!
 ```
