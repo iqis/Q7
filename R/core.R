@@ -2,28 +2,32 @@
 #'
 #' @param fn a constructor function
 #'
-#' @return obj::generator, function
+#' @return s1::generator, function
 #' @export
 #'
 #' @examples
-create <- function(fn){
+obj <- function(fn){
         fn_body <- deparse(body(fn))
-        # insert environment() to the appropriate position depends on whether
-        # the body is wrapped with { }
-        body(fn) <- parse(text = c("{",
-                                   ".my <- structure(environment(),
-                                                     class = 'obj::instance')",
-                                   `if`(all(fn_body[c(1, length(fn_body))] == c("{", "}")),
-                                        fn_body[2:(length(fn_body) - 1)],
-                                        fn_body),
-                                   ".do <- function(expr) {eval(substitute(expr),
-                                                                envir = .my)}",
-                                   "return(.my)",
-                                   "}"),
-                          keep.source = FALSE)
+        body(fn) <-
+            parse(text = c("{",
+                           ".my <- structure(environment(),
+                                             class = 's1::instance')",
+                           `if`(all(fn_body[c(1, length(fn_body))] ==
+                                        c("{", "}")),
+                                fn_body[2:(length(fn_body) - 1)],
+                                fn_body),
+                           ".do <- function(expr){
+                                                  eval(substitute(expr),
+                                                       envir = .my)
+
+                           }",
+                           "return(.my)",
+                           "}"),
+                  keep.source = FALSE)
+
         structure(fn,
-                  class = c("obj::generator",
-                                class(fn)))
+                  class = c("s1::generator",
+                            class(fn)))
 }
 
 #' Title
@@ -35,7 +39,7 @@ create <- function(fn){
 #'
 #' @examples
 is_generator <- function(x){
-    inherits(x, "obj::generator")
+    inherits(x, "s1::generator")
 }
 
 #' Title
@@ -47,11 +51,11 @@ is_generator <- function(x){
 #'
 #' @examples
 is_instance <- function(x){
-    inherits(x, "obj::instance")
+    inherits(x, "s1::instance")
 }
 
-`print.obj::generator` <- function(x, ...) {
-    cat(paste0("<obj::generator>", "\n"))
+`print.s1::generator` <- function(x, ...) {
+    cat(paste0("<s1::generator>", "\n"))
     print(environment(x))
     print.function(unclass(x))
 }
@@ -79,7 +83,7 @@ clone <- function(...){
 #' @export
 #'
 #' @examples
-`clone.obj::instance` <- function(obj, deep = TRUE){
+`clone.s1::instance` <- function(obj, deep = TRUE){
     obj_clone <- new.env(parent = parent.env(obj))
     obj_clone$.my <- obj_clone
     names <- setdiff(ls(obj,all.names = TRUE), ".my")
