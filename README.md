@@ -84,9 +84,6 @@ max %>%
       treats_eaten > 5
     }
   })
-#> <environment: 0x0000000012df0158>
-#> attr(,"class")
-#> [1] "default"       "foo::instance"
 ```
 
 ``` r
@@ -159,14 +156,11 @@ hasCollar <- feature({
 
 ``` r
 walter %>%
-  hasCollar() %>% 
   implement({
+    hasCollar()
     collar <- Collar("metal", "red")
     rm(Collar)
   })
-#> <environment: 0x0000000012a99040>
-#> attr(,"class")
-#> [1] "default"       "foo::instance"
 ```
 
 ``` r
@@ -176,12 +170,12 @@ walter$take_for_a_walk()
 ```
 
 ``` r
-Employee <- type(function(weekly_hours){NULL}, s3 = "Employee")
+Employee <- type(function(weekly_hours){NULL}, "Employee")
 john <- Employee(45)
 ```
 
 ``` r
-Manager <- type(function(weekly_hours){NULL}, s3 = "Manager")
+Manager <- type(function(weekly_hours){NULL}, "Manager")
 mike <- Manager(45)
 ```
 
@@ -206,17 +200,14 @@ john$is_overtime()
 ``` r
 mike %>% 
   implement(hasOvertime())
-#> <environment: 0x0000000018a5cac0>
-#> attr(,"class")
-#> [1] "Manager"       "foo::instance"
 mike$is_overtime()
 #> [1] FALSE
 ```
 
 ``` r
-Boss <- type(function(weekly_hours){
+Boss <- 
+  type(function(weekly_hours){NULL}) %>% 
   hasOvertime.Manager()
-}, s3 = "Boss")
 jill <- Boss(80)
 jill$is_overtime()
 #> [1] FALSE
@@ -235,6 +226,74 @@ my_data_obj$a
 my_data_obj$add_to_a(20)
 my_data_obj$a
 #> [1] 21
+```
+
+## Another Example
+
+``` r
+require(foo)
+
+Circle <- 
+    type(function(radius){NULL}, 
+         "Circle")
+    
+Square <- 
+    type(function(side){NULL}, 
+         "Square")
+
+hasArea <- feature_generic("hasArea")
+
+hasArea.Square <- 
+    feature({
+        area <- function(){
+            .my$side ^ 2
+        }
+    })
+
+hasArea.Circle <- 
+    feature({
+        area <- function(){
+            .my$radius^2 * pi
+        }
+    })
+
+circle_1 <- Circle(1)
+circle_1 %>% hasArea()
+circle_1$area()
+#> [1] 3.141593
+
+square_1 <- Square(1)
+square_1 %>% hasArea()
+square_1$area()
+#> [1] 1
+
+
+hasArea.EquilateralTriangle <- feature({
+    area <- function(){
+        (side^2 * sqrt(3)) / 4
+    }
+})
+
+EquilateralTriangle <- 
+    type(function(side){NULL}, 
+         "EquilateralTriangle") %>%
+    hasArea()
+
+equilateral_triangle_1 <- EquilateralTriangle(1)
+equilateral_triangle_1$area()
+#> [1] 0.4330127
+```
+
+``` r
+Rat <- type(function(){NULL}, "Rat")
+hasWing <- feature({
+  can_fly <- TRUE
+})
+Bat <- type(function(){NULL}, "Bat") %>% 
+  hasWing()
+bat <- Bat()
+bat$can_fly
+#> [1] TRUE
 ```
 
 TODO: what if features have same bidings? what to do then? - evaluate

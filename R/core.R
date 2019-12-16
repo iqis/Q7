@@ -117,7 +117,7 @@ implement <- function(obj, feat) {
         fn_body <- inject_text(fn_body, feat, length(fn_body) - 1)
         body(obj) <- parse(text = c("{", fn_body, "}"))
     }
-    structure(obj, class = obj_classes)
+    invisible(structure(obj, class = obj_classes))
 }
 
 #' Clone

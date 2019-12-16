@@ -162,8 +162,8 @@ hasCollar <- feature({
 
 ```{r}
 walter %>%
-  hasCollar() %>% 
   implement({
+    hasCollar()
     collar <- Collar("metal", "red")
     rm(Collar)
   })
@@ -175,12 +175,12 @@ walter$take_for_a_walk()
 ```
 
 ```{r}
-Employee <- type(function(weekly_hours){NULL}, s3 = "Employee")
+Employee <- type(function(weekly_hours){NULL}, "Employee")
 john <- Employee(45)
 ```
 
 ```{r}
-Manager <- type(function(weekly_hours){NULL}, s3 = "Manager")
+Manager <- type(function(weekly_hours){NULL}, "Manager")
 mike <- Manager(45)
 ```
 
@@ -211,9 +211,9 @@ mike$is_overtime()
 
 
 ```{r}
-Boss <- type(function(weekly_hours){
+Boss <- 
+  type(function(weekly_hours){NULL}) %>% 
   hasOvertime.Manager()
-}, s3 = "Boss")
 jill <- Boss(80)
 jill$is_overtime()
 ```
@@ -231,7 +231,73 @@ my_data_obj$add_to_a(20)
 my_data_obj$a
 ```
 
+## Another Example
+```{r}
+require(foo)
+
+Circle <- 
+    type(function(radius){NULL}, 
+         "Circle")
+    
+Square <- 
+    type(function(side){NULL}, 
+         "Square")
+
+hasArea <- feature_generic("hasArea")
+
+hasArea.Square <- 
+    feature({
+        area <- function(){
+            .my$side ^ 2
+        }
+    })
+
+hasArea.Circle <- 
+    feature({
+        area <- function(){
+            .my$radius^2 * pi
+        }
+    })
+
+circle_1 <- Circle(1)
+circle_1 %>% hasArea()
+circle_1$area()
+
+square_1 <- Square(1)
+square_1 %>% hasArea()
+square_1$area()
+
+
+hasArea.EquilateralTriangle <- feature({
+    area <- function(){
+        (side^2 * sqrt(3)) / 4
+    }
+})
+
+EquilateralTriangle <- 
+    type(function(side){NULL}, 
+         "EquilateralTriangle") %>%
+    hasArea()
+
+equilateral_triangle_1 <- EquilateralTriangle(1)
+equilateral_triangle_1$area()
+
+```
+
+```{r}
+Rat <- type(function(){NULL}, "Rat")
+hasWing <- feature({
+  can_fly <- TRUE
+})
+Bat <- type(function(){NULL}, "Bat") %>% 
+  hasWing()
+bat <- Bat()
+bat$can_fly
+```
+
+
 TODO: what if features have same bidings? what to do then? 
-- evaluate each feature to their own environment, each has the parent of .my, or inside .my
-- let the user pick and choose what bindings to _import_
-- prefix bidings with class name
+ - evaluate each feature to their own environment, each has the parent of .my, or inside .my
+ - let the user pick and choose what bindings to _import_
+ - prefix bidings with class name
+
