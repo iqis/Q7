@@ -52,6 +52,21 @@ list2inst <- function(x, s3 = "default", parent = parent.frame(), ...){
               class = s3)
 }
 
+#' Create a Generic Feature
+#'
+#' @param s3
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+feature_generic <- function(s3, ...){
+    function(x = parent.frame()$.my, ...){
+        UseMethod(s3, x)
+    }
+}
+
 #' Create an Object Feature
 #'
 #' @param expr
@@ -72,7 +87,7 @@ feature <- function(expr){
             fn_body <- inject_text(fn_body, expr, length(fn_body) - 1)
             body(obj) <- parse(text = c("{", fn_body, "}"))
         }
-        structure(obj, class = obj_classes)
+        invisible(structure(obj, class = obj_classes))
     }
     structure(fn, class = "foo::feature")
 }

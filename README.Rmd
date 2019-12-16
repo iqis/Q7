@@ -59,7 +59,7 @@ require(foo)
 
 
 ```{r}
-dog <- type(function(name, breed){
+Dog <- type(function(name, breed){
     say <- function(greeting = "Woof!"){
         cat(paste0(greeting, 
                    " I am ", name, ", a ", breed, 
@@ -70,7 +70,7 @@ dog <- type(function(name, breed){
 
 
 ```{r}
-walter <- dog("Walter", "Husky")
+walter <- Dog("Walter", "Husky")
 ls(walter, all.names = TRUE)
 ```
 
@@ -116,27 +116,27 @@ max$treats_eaten
 ```
 
 ```{r}
-is_animal <- feature({
+isAnimal <- feature({
     mortal <- TRUE
     eat <- function() paste(.my$name, "eats.")
     poop <- function() paste(name, "poops")
 })
 
 max %>% 
-  is_animal()
+  isAnimal()
 
 max$eat()
 max$poop()
 ```
 
 ```{r}
-person <- type(function(name, job) {
+Person <- type(function(name, job) {
   description <- function(){
     paste(name, "works as a(n)", job)
   }
-  is_animal()
+  isAnimal()
 })
-archie <- person("Archie", "Analyst")
+archie <- Person("Archie", "Analyst")
 ```
 
 
@@ -146,8 +146,8 @@ archie$poop()
 ```
 
 ```{r}
-has_collar <- feature({
-  collar <- type(function(material, color){
+hasCollar <- feature({
+  Collar <- type(function(material, color){
     description <- function() {
       paste("is made of", material, "and in", color)
     }
@@ -162,9 +162,10 @@ has_collar <- feature({
 
 ```{r}
 walter %>%
-  has_collar() %>% 
+  hasCollar() %>% 
   implement({
-    collar <- collar("metal", "red")
+    collar <- Collar("metal", "red")
+    rm(Collar)
   })
 ```
 
@@ -174,24 +175,23 @@ walter$take_for_a_walk()
 ```
 
 ```{r}
-employee <- type(function(weekly_hours){NULL}, s3 = "employee")
-john <- employee(45)
+Employee <- type(function(weekly_hours){NULL}, s3 = "Employee")
+john <- Employee(45)
 ```
 
 ```{r}
-manager <- type(function(weekly_hours){NULL}, s3 = "manager")
-mike <- manager(45)
+Manager <- type(function(weekly_hours){NULL}, s3 = "Manager")
+mike <- Manager(45)
 ```
 
 
 ```{r}
-has_overtime <- function(x){
-  UseMethod("has_overtime")
-}
-has_overtime.employee <- feature({
+hasOvertime <- feature_generic("hasOvertime")
+  
+hasOvertime.Employee <- feature({
   is_overtime <- function() weekly_hours > 40
 })
-has_overtime.manager <- feature({
+hasOvertime.Manager <- feature({
   is_overtime <- function() FALSE
 })
 ```
@@ -199,22 +199,22 @@ has_overtime.manager <- feature({
 
 ```{r}
 john %>% 
-  has_overtime()
+  hasOvertime()
 john$is_overtime()
 ```
 
 ```{r}
 mike %>% 
-  implement(has_overtime)
+  implement(hasOvertime())
 mike$is_overtime()
 ```
 
 
 ```{r}
-boss <- type(function(weekly_hours){
-  has_overtime.manager()
-}, s3 = "boss")
-jill <- boss(80)
+Boss <- type(function(weekly_hours){
+  hasOvertime.Manager()
+}, s3 = "Boss")
+jill <- Boss(80)
 jill$is_overtime()
 ```
 
