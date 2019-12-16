@@ -34,7 +34,7 @@ Welcome! `foo` provides _Freestyle Object Oriented_ Programming features:
   - _Reference Semantics_
   - use `.my` to refer to self (optional)
   - Deep copy by default
-  - post-hoc `$.do()` too add more things
+  - post-hoc `$.implement()` too add more things
 
 - Unlocked environment/binding
   - Each object is an environment
@@ -48,6 +48,8 @@ Welcome! `foo` provides _Freestyle Object Oriented_ Programming features:
 devtools::install_github("iqis/foo")
 ```
 ## Example
+
+Walk through the following example and see if you can figure out how `foo` works.
 
 ```{r}
 dog <- foo::type(function(name, breed){
@@ -71,13 +73,14 @@ walter$say()
 ```
 
 ```{r}
-max <- foo::clone(walter)
+max <- walter %>% foo::clone()
 max$name <- "Max"
 max$say("Wussup Dawg!")
 ```
 
 ```{r}
-max$.do({
+max %>% 
+  implement({
     treats_eaten <- 0
     eat_treat <- function(n = 1){
         cat(paste(name, "eats", n, "treat(s).\n"))
@@ -104,7 +107,7 @@ is_animal <- foo::feature({
     poop <- function() paste(name, "poops")
 })
 
-max$.do({
+max$.implement({
     is_animal()
 })
 
@@ -144,10 +147,15 @@ has_collar <- foo::feature({
 ```
 
 ```{r}
-walter$.do({
-  has_collar()
-  collar <- collar("rubber", "red")
+walter %>%
+  has_collar() %>% 
+  foo::implement({
+    collar <- collar("metal", "red")
   })
+```
+
+
+```{r}
 walter$take_for_a_walk()
 ```
 

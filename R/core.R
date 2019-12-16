@@ -8,22 +8,22 @@
 #' @export
 #'
 #' @examples
-type <- function(fn){
+type <- function(fn, s3_class = "default"){
         fn_body <- deparse(body(fn))
         body(fn) <-
             parse(text = c("{",
-                           ".my <- structure(environment(),
-                                             class = 'foo::instance')",
+                           paste0(".my <- structure(environment(),",
+                                             "class = c('", s3_class, "', 'foo::instance'))"),
                            `if`(all(fn_body[c(1, length(fn_body))] ==
                                         c("{", "}")),
                                 fn_body[2:(length(fn_body) - 1)],
                                 fn_body),
-                           ".do <- function(expr){
+                           ".implement <- function(expr){
                                                   eval(substitute(expr),
                                                        envir = .my)
 
                            }",
-                           "return(.my)",
+                           "invisible(.my)",
                            "}"),
                   keep.source = FALSE)
 
@@ -32,7 +32,7 @@ type <- function(fn){
                             class(fn)))
 }
 
-#' Create a Object Feature
+#' Create an Object Feature
 #'
 #' @param expr
 #'
@@ -42,45 +42,36 @@ type <- function(fn){
 #' @examples
 feature <- function(expr){
     expr <- substitute(expr)
-    function(){
+    fn <- function(obj = parent.frame()){
         `if`(!exists(".my",
-                     envir = parent.frame(),
+                     envir = obj,
                      inherits = FALSE),
-             stop("Must be called inside an foo::instance"))
-        eval(expr, envir = parent.frame())
+             stop("Must be called inside a foo::instance"))
+        eval(expr, envir = obj)
+        invisible(obj)
     }
+    structure(fn, class = "foo::feature")
 }
 
-#' Title
+
+#' Implement any Feature for an Object
 #'
-#' @param x
+#' @param obj
+#' @param feat
 #'
 #' @return
 #' @export
 #'
 #' @examples
-is_type <- function(x){
-    inherits(x, "foo::type")
+implement <- function(obj, feat) {
+    feat <- substitute(feat)
+    if (is_feature(feat)) {
+        feature(obj)
+    } else if (is.language(feat)){
+        eval(feat, obj)
+    }
+    invisible(obj)
 }
-
-#' Title
-#'
-#' @param x
-#'
-#' @return
-#' @export
-#'
-#' @examples
-is_instance <- function(x){
-    inherits(x, "foo::instance")
-}
-
-`print.foo::type` <- function(x, ...) {
-    cat(paste0("<foo::type>", "\n"))
-    print(environment(x))
-    print.function(unclass(x))
-}
-
 
 #' Clone
 #'
@@ -114,9 +105,58 @@ clone <- function(...){
             environment(value) <- obj_clone
         }
         obj_clone[[name]] <- `if`(is_instance(value),
-                                 Recall(value,all.names),
-                                 value)
+                                  Recall(value,all.names),
+                                  value)
     }
     attributes(obj_clone) <- attributes(obj)
-    obj_clone
+    invisible(obj_clone)
 }
+
+
+
+
+#' Title
+#'
+#' @param x
+#'
+#' @return
+#' @export
+#'
+#' @examples
+is_type <- function(x){
+    inherits(x, "foo::type")
+}
+
+#' Title
+#'
+#' @param x
+#'
+#' @return
+#' @export
+#'
+#' @examples
+is_instance <- function(x){
+    inherits(x, "foo::instance")
+}
+
+
+#' Title
+#'
+#' @param x
+#'
+#' @return
+#' @export
+#'
+#' @examples
+is_feature <- function(x){
+    inherits(x, "foo::feature")
+}
+
+
+`print.foo::type` <- function(x, ...) {
+    cat(paste0("<foo::type>", "\n"))
+    print(environment(x))
+    print.function(unclass(x))
+}
+
+
