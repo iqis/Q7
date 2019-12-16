@@ -33,7 +33,7 @@ Welcome! `foo` provides _Freestyle Object Oriented_ Programming, featuring:
 - Compostable
   - _Reference Semantics_
   - instance can contain other instances
-  - post-hoc `$.implement()` to add more custom features
+  - post-hoc `implement()` to add more custom features
 
 - Unlocked environment/binding
   - Each object is an environment
@@ -174,12 +174,12 @@ walter$take_for_a_walk()
 ```
 
 ```{r}
-employee <- type(function(weekly_hours){}, s3_class = "employee")
+employee <- type(function(weekly_hours){NULL}, s3 = "employee")
 john <- employee(45)
 ```
 
 ```{r}
-manager <- type(function(weekly_hours){}, s3_class = "manager")
+manager <- type(function(weekly_hours){NULL}, s3 = "manager")
 mike <- manager(45)
 ```
 
@@ -205,19 +205,30 @@ john$is_overtime()
 
 ```{r}
 mike %>% 
-  has_overtime()
+  implement(has_overtime)
 mike$is_overtime()
 ```
 
+
 ```{r}
-my_data_str <- list2inst(list(a = 1, 
-                              add_to_a = function(value){
-                                .my$a <- a + value
-                              }), 
-                         s3_class = "my")
-my_data_str$a
-my_data_str$add_to_a(20)
-my_data_str$a
+boss <- type(function(weekly_hours){
+  has_overtime.manager()
+}, s3 = "boss")
+jill <- boss(80)
+jill$is_overtime()
+```
+
+```{r}
+my_data <- list(a = 1, 
+                add_to_a = function(value){
+                  .my$a <- a + value
+                })
+
+my_data_obj <- list2inst(my_data)
+
+my_data_obj$a
+my_data_obj$add_to_a(20)
+my_data_obj$a
 ```
 
 TODO: what if features have same bidings? what to do then? 

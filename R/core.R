@@ -8,29 +8,19 @@
 #' @export
 #'
 #' @examples
-type <- function(fn = function(){}, s3_class = "default"){
+type <- function(fn = function(){}, s3 = "default"){
         fn_body <- deparse(body(fn))
         body(fn) <-
             parse(text = c("{",
-                           paste0(".my <- structure(environment(),",
-                                             "class = c('", s3_class, "', 'foo::instance'))"),
-                           `if`(all(fn_body[c(1, length(fn_body))] ==
-                                        c("{", "}")),
-                                fn_body[2:(length(fn_body) - 1)],
-                                fn_body),
-                           ".implement <- function(expr){
-                                                  eval(substitute(expr),
-                                                       envir = .my)
-                                                  invisible(.my)
-
-                           }",
-                           "invisible(.my)",
+                           paste0(
+                               ".my <- structure(environment(), class = c('", s3, "', 'foo::instance'))"),
+                               strip_braces(fn_body),
+                           "return(.my)",
                            "}"),
                   keep.source = FALSE)
 
         structure(fn,
-                  class = c("foo::type",
-                            class(fn)))
+                  class = c(s3,"foo::type", class(fn)))
 }
 
 #' Build an foo::instance from a list
@@ -43,10 +33,11 @@ type <- function(fn = function(){}, s3_class = "default"){
 #' @export
 #'
 #' @examples
-list2inst <- function(x, s3_class = "default", parent = parent.frame(), ...){
+list2inst <- function(x, s3 = "default", parent = parent.frame(), ...){
     instance <- list2env(x, parent = parent, ...)
     instance$.my <- instance
-    migrate_fns <- function(from, to) {
+
+    (function(from, to) {
         sapply(Filter(function(.) is.function(get(., envir = from)),
                       ls(envir = from)),
                function(.) {
@@ -55,10 +46,10 @@ list2inst <- function(x, s3_class = "default", parent = parent.frame(), ...){
                    assign(., f, envir = to)
                })
         invisible(to)
-    }
-    migrate_fns(instance, instance)
+    })(instance, instance)
+
     structure(instance,
-              class = s3_class)
+              class = s3)
 }
 
 #' Create an Object Feature
@@ -71,13 +62,17 @@ list2inst <- function(x, s3_class = "default", parent = parent.frame(), ...){
 #' @examples
 feature <- function(expr){
     expr <- substitute(expr)
-    fn <- function(obj = parent.frame()){
-        `if`(!exists(".my",
-                     envir = obj,
-                     inherits = FALSE),
-             stop("Must be called inside a foo::instance"))
-        eval(expr, envir = obj)
-        invisible(obj)
+    fn <- function(obj = parent.frame()$.my){
+        obj_classes <- class(obj)
+        if (is_instance(obj)) {
+            eval(expr, envir = obj)
+        } else if (is_type(obj)) {
+            expr <- strip_braces(deparse(expr))
+            fn_body <- strip_braces(deparse(body(obj)))
+            fn_body <- inject_text(fn_body, expr, length(fn_body) - 1)
+            body(obj) <- parse(text = c("{", fn_body, "}"))
+        }
+        structure(obj, class = obj_classes)
     }
     structure(fn, class = "foo::feature")
 }
@@ -94,12 +89,20 @@ feature <- function(expr){
 #' @examples
 implement <- function(obj, feat) {
     feat <- substitute(feat)
-    if (is_feature(feat)) {
-        feat(obj)
-    } else if (is.language(feat)){
-        eval(feat, obj)
+    obj_classes <- class(obj)
+    if (is_instance(obj)) {
+        if (is_feature(feat)) {
+            feat(obj)
+        } else if (is.language(feat)) {
+            eval(feat, obj)
+        }
+    } else if (is_type(obj)) {
+        feat <- strip_braces(deparse(feat))
+        fn_body <- strip_braces(deparse(body(obj)))
+        fn_body <- inject_text(fn_body, feat, length(fn_body) - 1)
+        body(obj) <- parse(text = c("{", fn_body, "}"))
     }
-    invisible(obj)
+    structure(obj, class = obj_classes)
 }
 
 #' Clone
