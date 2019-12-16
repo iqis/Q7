@@ -170,12 +170,12 @@ walter$take_for_a_walk()
 ```
 
 ``` r
-Employee <- type(function(weekly_hours){NULL}, "Employee")
+Employee <- type(function(weekly_hours){}, "Employee")
 john <- Employee(45)
 ```
 
 ``` r
-Manager <- type(function(weekly_hours){NULL}, "Manager")
+Manager <- type(function(weekly_hours){}, "Manager")
 mike <- Manager(45)
 ```
 
@@ -206,7 +206,7 @@ mike$is_overtime()
 
 ``` r
 Boss <- 
-  type(function(weekly_hours){NULL}) %>% 
+  type(function(weekly_hours){}) %>% 
   hasOvertime.Manager()
 jill <- Boss(80)
 jill$is_overtime()
@@ -234,11 +234,11 @@ my_data_obj$a
 require(foo)
 
 Circle <- 
-    type(function(radius){NULL}, 
+    type(function(radius){}, 
          "Circle")
     
 Square <- 
-    type(function(side){NULL}, 
+    type(function(side){}, 
          "Square")
 
 hasArea <- feature_generic("hasArea")
@@ -257,13 +257,11 @@ hasArea.Circle <-
         }
     })
 
-circle_1 <- Circle(1)
-circle_1 %>% hasArea()
+circle_1 <- Circle(1) %>% hasArea()
 circle_1$area()
 #> [1] 3.141593
 
-square_1 <- Square(1)
-square_1 %>% hasArea()
+square_1 <- Square(1) %>% hasArea()
 square_1$area()
 #> [1] 1
 
@@ -275,7 +273,7 @@ hasArea.EquilateralTriangle <- feature({
 })
 
 EquilateralTriangle <- 
-    type(function(side){NULL}, 
+    type(function(side){}, 
          "EquilateralTriangle") %>%
     hasArea()
 
@@ -285,14 +283,13 @@ equilateral_triangle_1$area()
 ```
 
 ``` r
-Rat <- type(function(){NULL}, "Rat")
+Rat <- type(function(){}, "Rat")
 hasWing <- feature({
   can_fly <- TRUE
 })
-Bat <- type(function(){NULL}, "Bat") %>% 
-  hasWing()
-bat <- Bat()
-bat$can_fly
+Pigeon <- Rat %>% hasWing()
+pigeon_1 <- Pigeon()
+pigeon_1$can_fly
 #> [1] TRUE
 ```
 

@@ -1,6 +1,8 @@
 strip_braces <- function(text){
     `if`(all(text[c(1, length(text))] == c("{", "}")),
-         text[2:(length(text) - 1)],
+         `if`(length(text) > 2,
+              text[2:(length(text) - 1)],
+              ""),
          text)
 }
 
