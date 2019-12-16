@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 # foo
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+<!-- [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental) -->
 <!-- badges: end -->
 
 Welcome! `foo` provides _Freestyle Object Oriented_ Programming, featuring:

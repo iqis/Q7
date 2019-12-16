@@ -4,7 +4,7 @@
 \alias{list2inst}
 \title{Build an foo::instance from a list}
 \usage{
-list2inst(x, s3_class = "default", parent = parent.frame(), ...)
+list2inst(x, s3 = "default", parent = parent.frame(), ...)
 }
 \arguments{
 \item{...}{}
