@@ -4,7 +4,7 @@
 \alias{type}
 \title{Create an foo Type}
 \usage{
-type(fn)
+type(fn = function() { }, s3_class = "default")
 }
 \arguments{
 \item{fn}{a constructor function}

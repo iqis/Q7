@@ -32,12 +32,13 @@ Welcome! `foo` provides _Freestyle Object Oriented_ Programming, featuring:
   
 - Compostable
   - _Reference Semantics_
-  - use `.my` to refer to self (optional)
-  - Deep copy by default
-  - post-hoc `$.implement()` too add more things
+  - instance can contain other instances
+  - post-hoc `$.implement()` to add more custom features
 
 - Unlocked environment/binding
   - Each object is an environment
+  - use `.my` to refer to self (optional)
+  - Deep copy by default
   - add, remove, change items in an object freely as you please
   - want immutability? don't write the code that changes things!
 
@@ -51,14 +52,14 @@ devtools::install_github("iqis/foo")
 
 Walk through the following example and see if you can figure out how `foo` works.
 
-```{r}
+```{r include=FALSE}
 require(magrittr)
 require(foo)
 ```
 
 
 ```{r}
-dog <- foo::type(function(name, breed){
+dog <- type(function(name, breed){
     say <- function(greeting = "Woof!"){
         cat(paste0(greeting, 
                    " I am ", name, ", a ", breed, 
@@ -79,7 +80,7 @@ walter$say()
 ```
 
 ```{r}
-max <- walter %>% foo::clone()
+max <- walter %>% clone()
 max$name <- "Max"
 max$say("Wussup Dawg!")
 ```
@@ -89,17 +90,25 @@ max %>%
   implement({
     treats_eaten <- 0
     eat_treat <- function(n = 1){
-        cat(paste(name, "eats", n, "treat(s).\n"))
-        treats_eaten <<- treats_eaten + n
+      cat(paste(name, "eats", n, "treat(s).\n"))
+      treats_eaten <<- treats_eaten + n
     }
-})
+  }) %>% 
+  implement({
+    is_satisfied <- function(){
+      treats_eaten > 5
+    }
+  })
 ```
 
 
 ```{r}
 max$eat_treat()
+max$is_satisfied()
 max$eat_treat(2)
+max$is_satisfied()
 max$eat_treat(3)
+max$is_satisfied()
 ```
 
 ```{r}
@@ -107,22 +116,21 @@ max$treats_eaten
 ```
 
 ```{r}
-is_animal <- foo::feature({
+is_animal <- feature({
     mortal <- TRUE
     eat <- function() paste(.my$name, "eats.")
     poop <- function() paste(name, "poops")
 })
 
-max$.implement({
-    is_animal()
-})
+max %>% 
+  is_animal()
 
 max$eat()
 max$poop()
 ```
 
 ```{r}
-person <- foo::type(function(name, job) {
+person <- type(function(name, job) {
   description <- function(){
     paste(name, "works as a(n)", job)
   }
@@ -138,8 +146,8 @@ archie$poop()
 ```
 
 ```{r}
-has_collar <- foo::feature({
-  collar <- foo::type(function(material, color){
+has_collar <- feature({
+  collar <- type(function(material, color){
     description <- function() {
       paste("is made of", material, "and in", color)
     }
@@ -171,7 +179,7 @@ john <- employee(45)
 ```
 
 ```{r}
-manager <- foo::type(function(weekly_hours){}, s3_class = "manager")
+manager <- type(function(weekly_hours){}, s3_class = "manager")
 mike <- manager(45)
 ```
 
@@ -180,10 +188,10 @@ mike <- manager(45)
 has_overtime <- function(x){
   UseMethod("has_overtime")
 }
-has_overtime.employee <- foo::feature({
+has_overtime.employee <- feature({
   is_overtime <- function() weekly_hours > 40
 })
-has_overtime.manager <- foo::feature({
+has_overtime.manager <- feature({
   is_overtime <- function() FALSE
 })
 ```
@@ -201,3 +209,18 @@ mike %>%
 mike$is_overtime()
 ```
 
+```{r}
+my_data_str <- list2inst(list(a = 1, 
+                              add_to_a = function(value){
+                                .my$a <- a + value
+                              }), 
+                         s3_class = "my")
+my_data_str$a
+my_data_str$add_to_a(20)
+my_data_str$a
+```
+
+TODO: what if features have same bidings? what to do then? 
+- evaluate each feature to their own environment, each has the parent of .my, or inside .my
+- let the user pick and choose what bindings to _import_
+- prefix bidings with class name

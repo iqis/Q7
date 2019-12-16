@@ -33,6 +33,34 @@ type <- function(fn = function(){}, s3_class = "default"){
                             class(fn)))
 }
 
+#' Build an foo::instance from a list
+#'
+#' @param x
+#' @param parent
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+list2inst <- function(x, s3_class = "default", parent = parent.frame(), ...){
+    instance <- list2env(x, parent = parent, ...)
+    instance$.my <- instance
+    migrate_fns <- function(from, to) {
+        sapply(Filter(function(.) is.function(get(., envir = from)),
+                      ls(envir = from)),
+               function(.) {
+                   f <- get(., envir = from)
+                   environment(f) <- to
+                   assign(., f, envir = to)
+               })
+        invisible(to)
+    }
+    migrate_fns(instance, instance)
+    structure(instance,
+              class = s3_class)
+}
+
 #' Create an Object Feature
 #'
 #' @param expr
@@ -110,7 +138,7 @@ clone <- function(...){
                                   value)
     }
     attributes(obj_clone) <- attributes(obj)
-    invisible(obj_clone)
+    obj_clone
 }
 
 
