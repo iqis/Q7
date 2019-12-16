@@ -8,7 +8,7 @@
 #' @export
 #'
 #' @examples
-type <- function(fn, s3_class = "default"){
+type <- function(fn = function(){}, s3_class = "default"){
         fn_body <- deparse(body(fn))
         body(fn) <-
             parse(text = c("{",
@@ -21,6 +21,7 @@ type <- function(fn, s3_class = "default"){
                            ".implement <- function(expr){
                                                   eval(substitute(expr),
                                                        envir = .my)
+                                                  invisible(.my)
 
                            }",
                            "invisible(.my)",
@@ -66,7 +67,7 @@ feature <- function(expr){
 implement <- function(obj, feat) {
     feat <- substitute(feat)
     if (is_feature(feat)) {
-        feature(obj)
+        feat(obj)
     } else if (is.language(feat)){
         eval(feat, obj)
     }
@@ -111,7 +112,6 @@ clone <- function(...){
     attributes(obj_clone) <- attributes(obj)
     invisible(obj_clone)
 }
-
 
 
 

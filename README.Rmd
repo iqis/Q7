@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 <!-- badges: end -->
 
-Welcome! `foo` provides _Freestyle Object Oriented_ Programming features:
+Welcome! `foo` provides _Freestyle Object Oriented_ Programming, featuring:
 
 - Native R Flavor
   - Everything is familiar
@@ -50,6 +50,12 @@ devtools::install_github("iqis/foo")
 ## Example
 
 Walk through the following example and see if you can figure out how `foo` works.
+
+```{r}
+require(magrittr)
+require(foo)
+```
+
 
 ```{r}
 dog <- foo::type(function(name, breed){
@@ -149,7 +155,7 @@ has_collar <- foo::feature({
 ```{r}
 walter %>%
   has_collar() %>% 
-  foo::implement({
+  implement({
     collar <- collar("metal", "red")
   })
 ```
@@ -157,5 +163,41 @@ walter %>%
 
 ```{r}
 walter$take_for_a_walk()
+```
+
+```{r}
+employee <- type(function(weekly_hours){}, s3_class = "employee")
+john <- employee(45)
+```
+
+```{r}
+manager <- foo::type(function(weekly_hours){}, s3_class = "manager")
+mike <- manager(45)
+```
+
+
+```{r}
+has_overtime <- function(x){
+  UseMethod("has_overtime")
+}
+has_overtime.employee <- foo::feature({
+  is_overtime <- function() weekly_hours > 40
+})
+has_overtime.manager <- foo::feature({
+  is_overtime <- function() FALSE
+})
+```
+
+
+```{r}
+john %>% 
+  has_overtime()
+john$is_overtime()
+```
+
+```{r}
+mike %>% 
+  has_overtime()
+mike$is_overtime()
 ```
 
