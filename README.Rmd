@@ -289,10 +289,10 @@ Rat <- type(function(){NULL}, "Rat")
 hasWing <- feature({
   can_fly <- TRUE
 })
-Bat <- Rat %>% 
+Pigeon <- Rat %>% 
   hasWing()
-bat <- Bat()
-bat$can_fly
+pigeon_1 <- Pigeon()
+pigeon_1$can_fly
 ```
 
 
