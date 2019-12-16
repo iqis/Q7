@@ -5,8 +5,8 @@
 
 <!-- badges: start -->
 
-[![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+<!-- [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental) -->
+
 <!-- badges: end -->
 
 Welcome\! `foo` provides *Freestyle Object Oriented* Programming,
@@ -22,7 +22,7 @@ featuring:
   - Compostable
       - *Reference Semantics*
       - instance can contain other instances
-      - post-hoc `$.implement()` to add more custom features
+      - post-hoc `implement()` to add more custom features
   - Unlocked environment/binding
       - Each object is an environment
       - use `.my` to refer to self (optional)
@@ -43,7 +43,7 @@ Walk through the following example and see if you can figure out how
 `foo` works.
 
 ``` r
-dog <- type(function(name, breed){
+Dog <- type(function(name, breed){
     say <- function(greeting = "Woof!"){
         cat(paste0(greeting, 
                    " I am ", name, ", a ", breed, 
@@ -53,9 +53,9 @@ dog <- type(function(name, breed){
 ```
 
 ``` r
-walter <- dog("Walter", "Husky")
+walter <- Dog("Walter", "Husky")
 ls(walter, all.names = TRUE)
-#> [1] ".implement" ".my"        "breed"      "name"       "say"
+#> [1] ".my"   "breed" "name"  "say"
 ```
 
 ``` r
@@ -84,6 +84,9 @@ max %>%
       treats_eaten > 5
     }
   })
+#> <environment: 0x0000000012df0158>
+#> attr(,"class")
+#> [1] "default"       "foo::instance"
 ```
 
 ``` r
@@ -107,14 +110,14 @@ max$treats_eaten
 ```
 
 ``` r
-is_animal <- feature({
+isAnimal <- feature({
     mortal <- TRUE
     eat <- function() paste(.my$name, "eats.")
     poop <- function() paste(name, "poops")
 })
 
 max %>% 
-  is_animal()
+  isAnimal()
 
 max$eat()
 #> [1] "Max eats."
@@ -123,13 +126,13 @@ max$poop()
 ```
 
 ``` r
-person <- type(function(name, job) {
+Person <- type(function(name, job) {
   description <- function(){
     paste(name, "works as a(n)", job)
   }
-  is_animal()
+  isAnimal()
 })
-archie <- person("Archie", "Analyst")
+archie <- Person("Archie", "Analyst")
 ```
 
 ``` r
@@ -140,8 +143,8 @@ archie$poop()
 ```
 
 ``` r
-has_collar <- feature({
-  collar <- type(function(material, color){
+hasCollar <- feature({
+  Collar <- type(function(material, color){
     description <- function() {
       paste("is made of", material, "and in", color)
     }
@@ -156,10 +159,14 @@ has_collar <- feature({
 
 ``` r
 walter %>%
-  has_collar() %>% 
+  hasCollar() %>% 
   implement({
-    collar <- collar("metal", "red")
+    collar <- Collar("metal", "red")
+    rm(Collar)
   })
+#> <environment: 0x0000000012a99040>
+#> attr(,"class")
+#> [1] "default"       "foo::instance"
 ```
 
 ``` r
@@ -169,57 +176,64 @@ walter$take_for_a_walk()
 ```
 
 ``` r
-employee <- type(function(weekly_hours){}, s3_class = "employee")
-#> Warning in `body<-`(`*tmp*`, value = parse(text = c("{", paste0(".my <-
-#> structure(environment(),", : using the first element of 'value' of type
-#> "expression"
-john <- employee(45)
+Employee <- type(function(weekly_hours){NULL}, s3 = "Employee")
+john <- Employee(45)
 ```
 
 ``` r
-manager <- type(function(weekly_hours){}, s3_class = "manager")
-#> Warning in `body<-`(`*tmp*`, value = parse(text = c("{", paste0(".my <-
-#> structure(environment(),", : using the first element of 'value' of type
-#> "expression"
-mike <- manager(45)
+Manager <- type(function(weekly_hours){NULL}, s3 = "Manager")
+mike <- Manager(45)
 ```
 
 ``` r
-has_overtime <- function(x){
-  UseMethod("has_overtime")
-}
-has_overtime.employee <- feature({
+hasOvertime <- feature_generic("hasOvertime")
+  
+hasOvertime.Employee <- feature({
   is_overtime <- function() weekly_hours > 40
 })
-has_overtime.manager <- feature({
+hasOvertime.Manager <- feature({
   is_overtime <- function() FALSE
 })
 ```
 
 ``` r
 john %>% 
-  has_overtime()
+  hasOvertime()
 john$is_overtime()
 #> [1] TRUE
 ```
 
 ``` r
 mike %>% 
-  has_overtime()
+  implement(hasOvertime())
+#> <environment: 0x0000000018a5cac0>
+#> attr(,"class")
+#> [1] "Manager"       "foo::instance"
 mike$is_overtime()
 #> [1] FALSE
 ```
 
 ``` r
-my_data_str <- list2inst(list(a = 1, 
-                              add_to_a = function(value){
-                                .my$a <- a + value
-                              }), 
-                         s3_class = "my")
-my_data_str$a
+Boss <- type(function(weekly_hours){
+  hasOvertime.Manager()
+}, s3 = "Boss")
+jill <- Boss(80)
+jill$is_overtime()
+#> [1] FALSE
+```
+
+``` r
+my_data <- list(a = 1, 
+                add_to_a = function(value){
+                  .my$a <- a + value
+                })
+
+my_data_obj <- list2inst(my_data)
+
+my_data_obj$a
 #> [1] 1
-my_data_str$add_to_a(20)
-my_data_str$a
+my_data_obj$add_to_a(20)
+my_data_obj$a
 #> [1] 21
 ```
 
