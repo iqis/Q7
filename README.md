@@ -12,33 +12,40 @@
 `foo` provides *Freestyle Object Oriented* Programming, a fluid &
 powerful paradigm that has many creative uses, featuring:
 
-  - Smart Objects:
-      - self-aware
-          - Knows about itself
-      - active
-          - Stores & invokes functions within
-      - extensible
-          - Make variants of an object
-  - No Magic
-      - Mechanism decomposes into basic R constructs
-          - A type is a function
-          - A feature is a function
-          - An instance is an environment
-      - Same great R syntax & semantics
-          - Straightforwardly perform any action on or within an object
-          - Follows native lexical scoping rules, almost no NSE
-  - Compositional
-      - …not hereditary
-      - Freely add, change or delete elements, ad/post hoc
-      - Focuses on “has-a”, rather than than “is\_a” relationships
-      - Objects can contain other objects (Reference Semantics?)
-  - Mutable
-      - Instances are unlocked environments
-      - Easy run time debugging
-      - No one stops you from shooting your feet
-      - Want safety? Lock’em yourself
+#### Smart Objects
 
-Interface
+  - self-aware
+      - Knows about itself
+  - active
+      - Stores & invokes functions within
+  - extensible
+      - Make variants of an object
+
+#### No Magic
+
+  - Mechanism decomposes into basic R constructs
+      - A type is a function
+      - A feature is a function
+      - An instance is an environment
+  - Same great R syntax & semantics
+      - Straightforwardly perform any action on or within an object
+      - Follows native lexical scoping rules, almost no NSE
+
+#### Compositional
+
+  - …not hereditary
+  - Freely add, change or delete elements, ad/post hoc
+  - Focuses on “has-a”, rather than than “is\_a” relationships
+  - Objects can contain other objects (Reference Semantics?)
+
+#### Mutable
+
+  - Instances are unlocked environments
+  - Easy run time debugging
+  - No one stops you from shooting your feet
+  - Want safety? Lock’em yourself
+
+### Interface
 
   - `type()`
       - Defines a *type*. (like *class*)
@@ -70,12 +77,12 @@ Interface
 devtools::install_github("iqis/foo")
 ```
 
-## Example
+## Examples
 
 Walk through the following examples and see if you can figure out how
 `foo` works.
 
-## Dogs & Humans
+### Dogs & Humans
 
 ``` r
 Dog <- type(function(name, breed){
@@ -204,7 +211,7 @@ walter$take_for_a_walk()
 #> We're gonna go out for a walk!
 ```
 
-## Overtime
+### Overtime
 
 ``` r
 Employee <- type(function(weekly_hours){}, "Employee")
@@ -250,7 +257,7 @@ jill$is_overtime()
 #> [1] FALSE
 ```
 
-## List-to-Instance
+### List-to-Instance
 
 ``` r
 my_data <- list(a = 1, 
@@ -267,7 +274,7 @@ my_data_obj$a
 #> [1] 21
 ```
 
-## Grade School Geometry
+### Grade School Geometry
 
 ``` r
 require(foo)
@@ -321,7 +328,7 @@ equilateral_triangle_1$area()
 #> [1] 0.4330127
 ```
 
-## Flying Rat
+### Flying Rat
 
 ``` r
 Rat <- type(function(){}, "Rat")
@@ -334,7 +341,7 @@ pigeon$can_fly
 #> [1] TRUE
 ```
 
-## Locked
+### Locked
 
 ``` r
 isLocked <- feature({
@@ -346,18 +353,20 @@ Test <- type(function(){
 }) %>% isLocked()
 
 test <- Test()
-try({
-  test$a <- 666
-  test$b <- 666
-  
-  test %>% implement({
-    a <- 666
-  })
-})
+try(test$a <- 666)
 #> Error in test$a <- 666 : cannot change value of locked binding for 'a'
+try(test$b <- 666)
+#> Error in test$b <- 666 : cannot add bindings to a locked environment
+try({
+  test %>% 
+    implement({
+      a <- 666
+    })
+})
+#> Error in eval(feat, obj) : cannot change value of locked binding for 'a'
 ```
 
-## State Machine
+### State Machine
 
 ``` r
 State <- type(function(){
@@ -425,3 +434,5 @@ TODO: what if features have same bidings? what to do then?
     of .my, or inside .my
   - let the user pick and choose what bindings to *import*
   - prefix bidings with type name
+  - teach the user to manually rename existing bindings in time of
+    collision

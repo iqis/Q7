@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 `foo` provides _Freestyle Object Oriented_ Programming, a fluid & powerful paradigm that has many creative uses, featuring:
 
-- Smart Objects: 
+#### Smart Objects
   - self-aware 
     - Knows about itself
   - active
@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
   - extensible
     - Make variants of an object
 
-- No Magic
+#### No Magic
   - Mechanism decomposes into basic R constructs 
     - A type is a function
     - A feature is a function
@@ -39,19 +39,19 @@ knitr::opts_chunk$set(
     - Straightforwardly perform any action on or within an object 
     - Follows native lexical scoping rules, almost no NSE
   
-- Compositional
+#### Compositional
   - ...not hereditary
   - Freely add, change or delete elements, ad/post hoc
   - Focuses on "has-a", rather than than "is_a" relationships
   - Objects can contain other objects (Reference Semantics?)
   
-- Mutable 
+#### Mutable 
   - Instances are unlocked environments
   - Easy run time debugging
   - No one stops you from shooting your feet
   - Want safety? Lock'em yourself
 
-Interface
+### Interface
 
 - `type()`
   - Defines a _type_. (like _class_)
@@ -79,7 +79,7 @@ Interface
 # install.packages("devtools")
 devtools::install_github("iqis/foo")
 ```
-## Example
+## Examples
 
 Walk through the following examples and see if you can figure out how `foo` works.
 
@@ -88,7 +88,7 @@ require(foo)
 ```
 
 
-## Dogs & Humans
+### Dogs & Humans
 ```{r}
 Dog <- type(function(name, breed){
     say <- function(greeting = "Woof!"){
@@ -206,7 +206,7 @@ walter$take_for_a_walk()
 ```
 
 
-## Overtime
+### Overtime
 ```{r}
 Employee <- type(function(weekly_hours){}, "Employee")
 john <- Employee(45)
@@ -251,7 +251,7 @@ jill <- Boss(80)
 jill$is_overtime()
 ```
 
-## List-to-Instance
+### List-to-Instance
 ```{r}
 my_data <- list(a = 1, 
                 add_to_a = function(value){
@@ -265,7 +265,7 @@ my_data_obj$add_to_a(20)
 my_data_obj$a
 ```
 
-## Grade School Geometry
+### Grade School Geometry
 ```{r}
 require(foo)
 
@@ -317,7 +317,7 @@ equilateral_triangle_1$area()
 ```
 
 
-## Flying Rat
+### Flying Rat
 ```{r}
 Rat <- type(function(){}, "Rat")
 hasWing <- feature({
@@ -329,7 +329,7 @@ pigeon$can_fly
 ```
 
 
-## Locked 
+### Locked 
 
 ```{r}
 isLocked <- feature({
@@ -341,16 +341,16 @@ Test <- type(function(){
 }) %>% isLocked()
 
 test <- Test()
+try(test$a <- 666)
+try(test$b <- 666)
 try({
-  test$a <- 666
-  test$b <- 666
-  
-  test %>% implement({
-    a <- 666
-  })
+  test %>% 
+    implement({
+      a <- 666
+    })
 })
 ```
-## State Machine
+### State Machine
 ```{r}
 State <- type(function(){
     name <- "DEFAULT"
@@ -409,4 +409,5 @@ TODO: what if features have same bidings? what to do then?
 - evaluate each feature to their own environment, each has the parent of .my, or inside .my
 - let the user pick and choose what bindings to _import_
 - prefix bidings with type name
+- teach the user to manually rename existing bindings in time of collision
 
