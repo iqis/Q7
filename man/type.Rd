@@ -15,3 +15,6 @@ foo::type, function
 \description{
 This function is a object generator
 }
+\examples{
+
+}

@@ -191,6 +191,22 @@ is_instance <- function(x){
 }
 
 
+#' Localize a Type's Environment
+#'
+#' @param type foo::type
+#' @param envir environment
+#'
+#' @return foo::type
+#' @export
+#'
+#' @examples
+localize <- function(type, envir = parent.frame()){
+    stopifnot(is_type(type))
+    environment(type) <- envir
+    type
+}
+
+
 #' Title
 #'
 #' @param x
