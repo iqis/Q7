@@ -26,6 +26,27 @@ type <- function(fn = function(){}, s3 = "default"){
                   class = c(s3,"foo::type", class(fn)))
 }
 
+
+
+#' Extend upon a Protoype
+#'
+#' Used only inside a type definition
+#'
+#' @param prototype foo::type
+#'
+#' @return function
+#' @export
+#'
+#' @examples
+extend <- function(prototype){
+    function(...){
+        type_envir <- parent.frame()
+        prototype_envir <- localize(prototype, envir = type_envir)(...)
+        migrate_objs(prototype_envir, type_envir)
+        migrate_fns(prototype_envir, type_envir)
+    }
+}
+
 #' Build an foo::instance from a list
 #'
 #' @param x
@@ -119,7 +140,7 @@ implement <- function(obj, feat) {
     } else if (is_type(obj)) {
         feat <- strip_braces(deparse(feat))
         fn_body <- strip_braces(deparse(body(obj)))
-        fn_body <- inject_text(fn_body, feat, length(fn_body) - 1)
+        fn_body <- inject_text(fn_body, feat, length(fn_body) - 3)
         body(obj) <- parse(text = c("{", fn_body, "}"))
     }
     invisible(structure(obj, class = obj_classes))
@@ -201,7 +222,7 @@ is_instance <- function(x){
 #'
 #' @examples
 localize <- function(type, envir = parent.frame()){
-    stopifnot(is_type(type))
+    stopifnot(is.function(type))
     environment(type) <- envir
     type
 }

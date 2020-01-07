@@ -9,7 +9,7 @@
 
 <!-- badges: end -->
 
-`foo` provides *Freestyle Object Oriented* Programming, a fluid &
+`foo` stands for *Freestyle Object Oriented* Programming, a fluid &
 powerful paradigm that has many creative uses, featuring:
 
 #### Smart Objects
@@ -175,7 +175,7 @@ archie <- Person("Archie", "Analyst")
 
 ``` r
 archie
-#> <environment: 0x0000000012c92880>
+#> <environment: 0x0000000012d1c360>
 #> attr(,"class")
 #> [1] "default"       "foo::instance"
 archie$description()
@@ -212,6 +212,38 @@ walter %>%
 walter$take_for_a_walk()
 #> Walter wears a collar that is made of metal and in red 
 #> We're gonna go out for a walk!
+```
+
+### Extensible
+
+``` r
+Type1 <- type(function(arg1){
+    val1 <- arg1
+    get_val1 <- function(){
+        val1
+    }
+}, "Type1")
+
+Type2 <- type(function(arg1, arg2){
+    extend(Type1)(arg1)
+    val2 <- arg2
+    get_val2 <- function(){
+        val2
+    }
+    
+}, "Type2")
+```
+
+``` r
+type2 <- Type2("one", "two")
+type2$val1
+#> [1] "one"
+type2$val2
+#> [1] "two"
+type2$get_val1()
+#> [1] "one"
+type2$get_val2()
+#> [1] "two"
 ```
 
 ### Overtime
@@ -419,7 +451,9 @@ SimpleDevice <- type(function(){
         .my$state <- state$on_event(event)
     }
 })
+```
 
+``` r
 device <- SimpleDevice()
 #> Processing Current State...
 #> Current State: Locked

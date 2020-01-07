@@ -3,6 +3,7 @@
 S3method(clone,"foo::instance")
 export("%>%")
 export(clone)
+export(extend)
 export(feature)
 export(feature_generic)
 export(implement)

@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 
-`foo` provides _Freestyle Object Oriented_ Programming, a fluid & powerful paradigm that has many creative uses, featuring:
+`foo` stands for _Freestyle Object Oriented_ Programming, a fluid & powerful paradigm that has many creative uses, featuring:
 
 #### Smart Objects
   - self-aware 
@@ -203,6 +203,34 @@ walter %>%
 
 ```{r}
 walter$take_for_a_walk()
+```
+
+### Extensible
+```{r}
+Type1 <- type(function(arg1){
+    val1 <- arg1
+    get_val1 <- function(){
+        val1
+    }
+}, "Type1")
+
+Type2 <- type(function(arg1, arg2){
+    extend(Type1)(arg1)
+    val2 <- arg2
+    get_val2 <- function(){
+        val2
+    }
+    
+}, "Type2")
+```
+
+
+```{r}
+type2 <- Type2("one", "two")
+type2$val1
+type2$val2
+type2$get_val1()
+type2$get_val2()
 ```
 
 
@@ -399,7 +427,10 @@ SimpleDevice <- type(function(){
         .my$state <- state$on_event(event)
     }
 })
+```
 
+
+```{r}
 device <- SimpleDevice()
 
 device$on_event("0000")
