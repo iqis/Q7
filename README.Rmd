@@ -19,28 +19,59 @@ knitr::opts_chunk$set(
 <!-- [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental) -->
 <!-- badges: end -->
 
-Welcome! `foo` provides _Freestyle Object Oriented_ Programming, featuring:
 
-- Native R Flavor
-  - Everything is familiar
-  - Use `<-` to assign value to bindings
-  
-- No Inheritance
-  - No lineage to trace back to
-  - No methods you don't need
-  - No mess
-  
-- Compostable
-  - _Reference Semantics_
-  - instance can contain other instances
-  - post-hoc `implement()` to add more custom features
+`foo` provides _Freestyle Object Oriented_ Programming, a fluid & powerful paradigm that has many creative uses, featuring:
 
-- Unlocked environment/binding
-  - Each object is an environment
-  - use `.my` to refer to self (optional)
-  - Deep copy by default
-  - add, remove, change items in an object freely as you please
-  - want immutability? don't write the code that changes things!
+#### Smart Objects
+  - self-aware 
+    - Knows about itself
+  - active
+    - Stores & invokes functions within
+  - extensible
+    - Make variants of an object
+
+#### No Magic
+  - Mechanism decomposes into basic R constructs 
+    - A type is a function
+    - A feature is a function
+    - An instance is an environment
+  - Same great R syntax & semantics
+    - Straightforwardly perform any action on or within an object 
+    - Follows native lexical scoping rules, almost no NSE
+  
+#### Compositional
+  - ...not hereditary
+  - Freely add, change or delete elements, ad/post hoc
+  - Focuses on "has-a", rather than than "is_a" relationships
+  - Objects can contain other objects (Reference Semantics?)
+  
+#### Mutable 
+  - Instances are unlocked environments
+  - Easy run time debugging
+  - No one stops you from shooting your feet
+  - Want safety? Lock'em yourself
+
+### Interface
+
+- `type()`
+  - Defines a _type_. (like _class_)
+  - Takes a function
+  - Returns the same function, plus some other code
+  - When invoked, the function's closure becomes an _instance_, which is an environment
+    - Contains every binding inside the closure, including arguments
+    - Also contains `.my`, which refers to the instance itself
+- `feature()`
+  - Defines a _feature_
+  - Takes any expression
+  - Appends the expression to the object
+    - Ad hoc: A _feature_ can be implemented on a _type_
+    - Post hoc: Can also be implemented on an _instance_ 
+- `implement()`
+  - Takes
+    - object, a _type_ or _instance_
+    - any expression (including _features_, but more importantly, any arbitrary expression)
+  - Returns what was passed in
+  - Appends the expresseion to the object
 
 ## Installation
 
@@ -48,15 +79,16 @@ Welcome! `foo` provides _Freestyle Object Oriented_ Programming, featuring:
 # install.packages("devtools")
 devtools::install_github("iqis/foo")
 ```
-## Example
+## Examples
 
-Walk through the following example and see if you can figure out how `foo` works.
+Walk through the following examples and see if you can figure out how `foo` works.
 
 ```{r include=FALSE}
 require(foo)
 ```
 
 
+### Dogs & Humans
 ```{r}
 Dog <- type(function(name, breed){
     say <- function(greeting = "Woof!"){
@@ -173,6 +205,8 @@ walter %>%
 walter$take_for_a_walk()
 ```
 
+
+### Overtime
 ```{r}
 Employee <- type(function(weekly_hours){}, "Employee")
 john <- Employee(45)
@@ -222,6 +256,7 @@ jill <- Boss(80)
 jill$is_overtime()
 ```
 
+### List-to-Instance
 ```{r}
 my_data <- list(a = 1, 
                 add_to_a = function(value){
@@ -235,7 +270,7 @@ my_data_obj$add_to_a(20)
 my_data_obj$a
 ```
 
-## Another Example
+### Grade School Geometry
 ```{r}
 require(foo)
 
@@ -286,19 +321,98 @@ equilateral_triangle_1$area()
 
 ```
 
+
+### Flying Rat
 ```{r}
 Rat <- type(function(){}, "Rat")
 hasWing <- feature({
   can_fly <- TRUE
 })
 Pigeon <- Rat %>% hasWing()
-pigeon_1 <- Pigeon()
-pigeon_1$can_fly
+pigeon <- Pigeon()
+pigeon$can_fly
+```
+
+
+### Locked 
+
+```{r}
+isLocked <- feature({
+    lockEnvironment(.my, bindings = TRUE)
+})
+
+Test <- type(function(){
+    a <- 1
+}) %>% isLocked()
+
+test <- Test()
+try(test$a <- 666)
+try(test$b <- 666)
+try({
+  test %>% 
+    implement({
+      a <- 666
+    })
+})
+```
+### State Machine
+```{r}
+State <- type(function(){
+    name <- "DEFAULT"
+    cat("Processing Current State...\n")
+    print_current_state <- function(){
+        cat(paste("Current State:", name, "\n"))
+    }
+})
+
+LockedState <- State %>%
+    implement({
+        name <- "Locked"
+        print_current_state()
+        on_event <- function(event) {
+            if (event == "8888") {
+                return(UnlockedState())
+            } else {
+                cat("Wrong Password.\n")
+                return(.my)
+            }
+        }
+    })
+
+UnlockedState <- State %>%
+    implement({
+        name <- "Unlocked"
+        print_current_state()
+        on_event <- function(event) {
+            if (event == "lock") {
+                return(LockedState())
+            } else {
+                cat("Invalid Operation. \n")
+                return(.my)
+            }
+        }
+    })
+
+SimpleDevice <- type(function(){
+    state <- LockedState()
+    on_event <- function(event){
+        .my$state <- state$on_event(event)
+    }
+})
+
+device <- SimpleDevice()
+
+device$on_event("0000")
+device$on_event("8888")
+device$on_event("do something")
+device$on_event("lock")
 ```
 
 
 TODO: what if features have same bidings? what to do then? 
- - evaluate each feature to their own environment, each has the parent of .my, or inside .my
- - let the user pick and choose what bindings to _import_
- - prefix bidings with class name
+
+- evaluate each feature to their own environment, each has the parent of .my, or inside .my
+- let the user pick and choose what bindings to _import_
+- prefix bidings with type name
+- teach the user to manually rename existing bindings in time of collision
 
