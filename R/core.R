@@ -8,14 +8,17 @@
 #' @export
 #'
 #' @examples
+#'
 type <- function(fn = function(){}, s3 = "default"){
         fn_body <- deparse(body(fn))
         body(fn) <-
             parse(text = c("{",
-                           paste0(
-                               ".my <- structure(environment(), class = c('", s3, "', 'foo::instance'))"),
-                               strip_braces(fn_body),
+                           "(function(){",
+                           ".my <- environment()",
+                           strip_braces(fn_body),
+                           paste0("class(.my) <- c('", s3, "', 'foo::instance')"),
                            "return(.my)",
+                           "})()",
                            "}"),
                   keep.source = FALSE)
 
@@ -84,7 +87,9 @@ feature <- function(expr){
         } else if (is_type(obj)) {
             expr <- strip_braces(deparse(expr))
             fn_body <- strip_braces(deparse(body(obj)))
-            fn_body <- inject_text(fn_body, expr, length(fn_body) - 1)
+            fn_body <- inject_text(text_1 = fn_body,
+                                   text_2 = expr,
+                                   index = length(fn_body) - 2)
             body(obj) <- parse(text = c("{", fn_body, "}"))
         }
         invisible(structure(obj, class = obj_classes))
