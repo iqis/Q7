@@ -53,7 +53,6 @@ devtools::install_github("iqis/foo")
 Walk through the following example and see if you can figure out how `foo` works.
 
 ```{r include=FALSE}
-require(magrittr)
 require(foo)
 ```
 
@@ -134,13 +133,13 @@ Person <- type(function(name, job) {
   description <- function(){
     paste(name, "works as a(n)", job)
   }
-  isAnimal()
-})
+}) %>% isAnimal()
 archie <- Person("Archie", "Analyst")
 ```
 
 
 ```{r}
+archie
 archie$description()
 archie$poop()
 ```
@@ -180,7 +179,10 @@ john <- Employee(45)
 ```
 
 ```{r}
-Manager <- type(function(weekly_hours){}, "Manager")
+Manager <- type(function(weekly_hours){
+  .my <- localize(Employee)(weekly_hours)
+  is_manager <- TRUE
+}, "Manager")
 mike <- Manager(45)
 ```
 
@@ -192,7 +194,7 @@ hasOvertime.Employee <- feature({
   is_overtime <- function() weekly_hours > 40
 })
 hasOvertime.Manager <- feature({
-  is_overtime <- function() FALSE
+  .my$is_overtime <- function() FALSE
 })
 ```
 
@@ -205,14 +207,16 @@ john$is_overtime()
 
 ```{r}
 mike %>% 
-  implement(hasOvertime())
+  hasOvertime()
 mike$is_overtime()
 ```
 
 
 ```{r}
 Boss <- 
-  type(function(weekly_hours){}) %>% 
+  type(function(weekly_hours){
+    weekly_hours <- weekly_hours
+  }) %>% 
   hasOvertime.Manager()
 jill <- Boss(80)
 jill$is_overtime()

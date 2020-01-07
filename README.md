@@ -55,7 +55,7 @@ Dog <- type(function(name, breed){
 ``` r
 walter <- Dog("Walter", "Husky")
 ls(walter, all.names = TRUE)
-#> [1] ".my"   "breed" "name"  "say"
+#> [1] ".my" "say"
 ```
 
 ``` r
@@ -127,12 +127,15 @@ Person <- type(function(name, job) {
   description <- function(){
     paste(name, "works as a(n)", job)
   }
-  isAnimal()
-})
+}) %>% isAnimal()
 archie <- Person("Archie", "Analyst")
 ```
 
 ``` r
+archie
+#> <environment: 0x0000000012c92880>
+#> attr(,"class")
+#> [1] "default"       "foo::instance"
 archie$description()
 #> [1] "Archie works as a(n) Analyst"
 archie$poop()
@@ -175,7 +178,10 @@ john <- Employee(45)
 ```
 
 ``` r
-Manager <- type(function(weekly_hours){}, "Manager")
+Manager <- type(function(weekly_hours){
+  .my <- localize(Employee)(weekly_hours)
+  is_manager <- TRUE
+}, "Manager")
 mike <- Manager(45)
 ```
 
@@ -186,7 +192,7 @@ hasOvertime.Employee <- feature({
   is_overtime <- function() weekly_hours > 40
 })
 hasOvertime.Manager <- feature({
-  is_overtime <- function() FALSE
+  .my$is_overtime <- function() FALSE
 })
 ```
 
@@ -199,14 +205,16 @@ john$is_overtime()
 
 ``` r
 mike %>% 
-  implement(hasOvertime())
+  hasOvertime()
 mike$is_overtime()
 #> [1] FALSE
 ```
 
 ``` r
 Boss <- 
-  type(function(weekly_hours){}) %>% 
+  type(function(weekly_hours){
+    weekly_hours <- weekly_hours
+  }) %>% 
   hasOvertime.Manager()
 jill <- Boss(80)
 jill$is_overtime()
@@ -259,11 +267,11 @@ hasArea.Circle <-
 
 circle_1 <- Circle(1) %>% hasArea()
 circle_1$area()
-#> [1] 3.141593
+#> numeric(0)
 
 square_1 <- Square(1) %>% hasArea()
 square_1$area()
-#> [1] 1
+#> numeric(0)
 
 
 hasArea.EquilateralTriangle <- feature({
