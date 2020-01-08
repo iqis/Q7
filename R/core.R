@@ -42,8 +42,10 @@ extend <- function(prototype){
     function(...){
         type_envir <- parent.frame()
         prototype_envir <- localize(prototype, envir = type_envir)(...)
-        migrate_objs(prototype_envir, type_envir)
-        migrate_fns(prototype_envir, type_envir)
+        if (length(ls(prototype_envir)) > 0) {
+            migrate_objs(prototype_envir, type_envir)
+            migrate_fns(prototype_envir, type_envir)
+        }
     }
 }
 

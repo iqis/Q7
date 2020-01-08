@@ -9,17 +9,18 @@
 
 <!-- badges: end -->
 
-`foo` stands for *Freestyle Object Oriented* Programming, a fluid &
-powerful paradigm that has many creative uses, featuring:
+`foo` provides *Freestyle Object Oriented* Programming, a fluid,
+powerful and *postmodern* paradigm that has many creative uses,
+featuring:
 
 #### Smart Objects
 
   - self-aware
       - Knows about itself
   - active
-      - Stores & invokes functions within
+      - Bind functions within
   - extensible
-      - Make variants of an object
+      - Make variants of an object (class, and instance)
 
 #### No Magic
 
@@ -29,19 +30,19 @@ powerful paradigm that has many creative uses, featuring:
       - An instance is an environment
   - Same great R syntax & semantics
       - Straightforwardly perform any action on or within an object
-      - Follows native lexical scoping rules, almost no NSE
+      - Follows native scoping rules, almost no NSE
 
 #### Compositional
 
-  - …not hereditary
+  - …not quite hereditary
   - Freely add, change or delete elements, ad/post hoc
-  - Focuses on “has-a”, rather than than “is\_a” relationships
-  - Objects can contain other objects (Reference Semantics?)
+  - Focuses on “has\_a”, rather than than “is\_a” relationships
+  - Objects can contain other objects (what is this called, Reference
+    Semantics?)
 
-#### Mutable
+#### Unlocked
 
   - Instances are unlocked environments
-  - Easy run time debugging
   - No one stops you from shooting your feet
   - Want safety? Lock’em yourself
 
@@ -53,8 +54,10 @@ powerful paradigm that has many creative uses, featuring:
       - Returns the same function, plus some other code
       - When invoked, the function’s closure becomes an *instance*,
         which is an environment
-          - Contains every binding inside the closure, including
+          - Contains every binding inside the closure, except for the
             arguments
+          - The arguments are not accessible outside of the object,
+            making them private
           - Also contains `.my`, which refers to the instance itself
   - `feature()`
       - Defines a *feature*
@@ -67,7 +70,6 @@ powerful paradigm that has many creative uses, featuring:
           - object, a *type* or *instance*
           - any expression (including *features*, but more importantly,
             any arbitrary expression)
-      - Returns what was passed in
       - Appends the expresseion to the object
 
 ## Installation
@@ -79,8 +81,8 @@ devtools::install_github("iqis/foo")
 
 ## Examples
 
-Walk through the following examples and see if you can figure out how
-`foo` works.
+Walk through the following comment-free examples and see if you can
+figure out how `foo` works.
 
 ### Dogs & Humans
 
@@ -175,7 +177,7 @@ archie <- Person("Archie", "Analyst")
 
 ``` r
 archie
-#> <environment: 0x0000000012d1c360>
+#> <environment: 0x0000000012d68e08>
 #> attr(,"class")
 #> [1] "default"       "foo::instance"
 archie$description()
@@ -214,7 +216,7 @@ walter$take_for_a_walk()
 #> We're gonna go out for a walk!
 ```
 
-### Extensible
+### Formally Extend a Type
 
 ``` r
 Type1 <- type(function(arg1){
@@ -230,7 +232,6 @@ Type2 <- type(function(arg1, arg2){
     get_val2 <- function(){
         val2
     }
-    
 }, "Type2")
 ```
 
@@ -255,9 +256,10 @@ john <- Employee(45)
 
 ``` r
 Manager <- type(function(weekly_hours){
-  .my <- localize(Employee)(weekly_hours)
+  extend(Employee)(weekly_hours)
   is_manager <- TRUE
 }, "Manager")
+
 mike <- Manager(45)
 ```
 
@@ -273,15 +275,13 @@ hasOvertime.Manager <- feature({
 ```
 
 ``` r
-john %>% 
-  hasOvertime()
+john %>% hasOvertime()
 john$is_overtime()
 #> [1] TRUE
 ```
 
 ``` r
-mike %>% 
-  hasOvertime()
+mike %>% hasOvertime()
 mike$is_overtime()
 #> [1] FALSE
 ```
@@ -317,8 +317,6 @@ my_data_obj$a
 ### Grade School Geometry
 
 ``` r
-require(foo)
-
 Circle <- 
     type(function(radius){}, 
          "Circle")
@@ -343,12 +341,12 @@ hasArea.Circle <-
         }
     })
 
-circle_1 <- Circle(1) %>% hasArea()
-circle_1$area()
+circle <- Circle(1) %>% hasArea()
+circle$area()
 #> numeric(0)
 
-square_1 <- Square(1) %>% hasArea()
-square_1$area()
+square <- Square(1) %>% hasArea()
+square$area()
 #> numeric(0)
 
 
@@ -363,8 +361,8 @@ EquilateralTriangle <-
          "EquilateralTriangle") %>%
     hasArea()
 
-equilateral_triangle_1 <- EquilateralTriangle(1)
-equilateral_triangle_1$area()
+equilateral_triangle <- EquilateralTriangle(1)
+equilateral_triangle$area()
 #> [1] 0.4330127
 ```
 
@@ -470,11 +468,29 @@ device$on_event("lock")
 #> Current State: Locked
 ```
 
-TODO: what if features have same bidings? what to do then?
+Private Elements
 
-  - evaluate each feature to their own environment, each has the parent
-    of .my, or inside .my
-  - let the user pick and choose what bindings to *import*
-  - prefix bidings with type name
-  - teach the user to manually rename existing bindings in time of
-    collision
+``` r
+
+Counter <- type(function(count = 0){
+    add_one <- function(){
+      count <<- count + 1
+    }
+    
+    get_count <- function(){
+      count
+    }
+})
+```
+
+``` r
+counter <- Counter()
+ls(counter)
+#> [1] "add_one"   "get_count"
+counter$get_count()
+#> [1] 0
+counter$add_one()
+counter$add_one()
+counter$get_count()
+#> [1] 2
+```

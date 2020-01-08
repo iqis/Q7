@@ -20,15 +20,15 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 
-`foo` stands for _Freestyle Object Oriented_ Programming, a fluid & powerful paradigm that has many creative uses, featuring:
+`foo` provides _Freestyle Object Oriented_ Programming, a fluid, powerful and _postmodern_ paradigm that borrows from Go and Rust, featuring:
 
 #### Smart Objects
   - self-aware 
     - Knows about itself
   - active
-    - Stores & invokes functions within
+    - Bind functions within
   - extensible
-    - Make variants of an object
+    - Make variants of an object (class and instance)
 
 #### No Magic
   - Mechanism decomposes into basic R constructs 
@@ -37,17 +37,16 @@ knitr::opts_chunk$set(
     - An instance is an environment
   - Same great R syntax & semantics
     - Straightforwardly perform any action on or within an object 
-    - Follows native lexical scoping rules, almost no NSE
+    - Follows native scoping rules, almost no NSE
   
 #### Compositional
-  - ...not hereditary
+  - ...not quite hereditary
   - Freely add, change or delete elements, ad/post hoc
-  - Focuses on "has-a", rather than than "is_a" relationships
-  - Objects can contain other objects (Reference Semantics?)
+  - Focuses on "has_a", rather than than "is_a" relationships
+  - Objects can contain other objects (what is this called, Reference Semantics?)
   
-#### Mutable 
+#### Unlocked
   - Instances are unlocked environments
-  - Easy run time debugging
   - No one stops you from shooting your feet
   - Want safety? Lock'em yourself
 
@@ -58,7 +57,8 @@ knitr::opts_chunk$set(
   - Takes a function
   - Returns the same function, plus some other code
   - When invoked, the function's closure becomes an _instance_, which is an environment
-    - Contains every binding inside the closure, including arguments
+    - Contains every binding inside the closure, except for the arguments
+    - The arguments are not accessible outside of the object, making them private
     - Also contains `.my`, which refers to the instance itself
 - `feature()`
   - Defines a _feature_
@@ -70,8 +70,11 @@ knitr::opts_chunk$set(
   - Takes
     - object, a _type_ or _instance_
     - any expression (including _features_, but more importantly, any arbitrary expression)
-  - Returns what was passed in
   - Appends the expresseion to the object
+
+`foo` users should leave behind the grand narrative of classical OOP orthodoxy, and exploit the benefits of objects as a unit of code, and an instrument for namespace resolution.
+  
+  
 
 ## Installation
 
@@ -81,7 +84,7 @@ devtools::install_github("iqis/foo")
 ```
 ## Examples
 
-Walk through the following examples and see if you can figure out how `foo` works.
+Walk through the following comment-free examples and see if you can figure out how `foo` works.
 
 ```{r include=FALSE}
 require(foo)
@@ -205,7 +208,7 @@ walter %>%
 walter$take_for_a_walk()
 ```
 
-### Extensible
+### Formally Extend a Type
 ```{r}
 Type1 <- type(function(arg1){
     val1 <- arg1
@@ -220,7 +223,6 @@ Type2 <- type(function(arg1, arg2){
     get_val2 <- function(){
         val2
     }
-    
 }, "Type2")
 ```
 
@@ -242,9 +244,10 @@ john <- Employee(45)
 
 ```{r}
 Manager <- type(function(weekly_hours){
-  .my <- localize(Employee)(weekly_hours)
+  extend(Employee)(weekly_hours)
   is_manager <- TRUE
 }, "Manager")
+
 mike <- Manager(45)
 ```
 
@@ -262,14 +265,12 @@ hasOvertime.Manager <- feature({
 
 
 ```{r}
-john %>% 
-  hasOvertime()
+john %>% hasOvertime()
 john$is_overtime()
 ```
 
 ```{r}
-mike %>% 
-  hasOvertime()
+mike %>% hasOvertime()
 mike$is_overtime()
 ```
 
@@ -300,8 +301,6 @@ my_data_obj$a
 
 ### Grade School Geometry
 ```{r}
-require(foo)
-
 Circle <- 
     type(function(radius){}, 
          "Circle")
@@ -326,11 +325,11 @@ hasArea.Circle <-
         }
     })
 
-circle_1 <- Circle(1) %>% hasArea()
-circle_1$area()
+circle <- Circle(1) %>% hasArea()
+circle$area()
 
-square_1 <- Square(1) %>% hasArea()
-square_1$area()
+square <- Square(1) %>% hasArea()
+square$area()
 
 
 hasArea.EquilateralTriangle <- feature({
@@ -344,8 +343,8 @@ EquilateralTriangle <-
          "EquilateralTriangle") %>%
     hasArea()
 
-equilateral_triangle_1 <- EquilateralTriangle(1)
-equilateral_triangle_1$area()
+equilateral_triangle <- EquilateralTriangle(1)
+equilateral_triangle$area()
 
 ```
 
@@ -439,11 +438,27 @@ device$on_event("do something")
 device$on_event("lock")
 ```
 
+Private Elements
+```{r}
 
-TODO: what if features have same bidings? what to do then? 
+Counter <- type(function(count = 0){
+    add_one <- function(){
+      count <<- count + 1
+    }
+    
+    get_count <- function(){
+      count
+    }
+})
 
-- evaluate each feature to their own environment, each has the parent of .my, or inside .my
-- let the user pick and choose what bindings to _import_
-- prefix bidings with type name
-- teach the user to manually rename existing bindings in time of collision
+```
+
+```{r}
+counter <- Counter()
+ls(counter)
+counter$get_count()
+counter$add_one()
+counter$add_one()
+counter$get_count()
+```
 
