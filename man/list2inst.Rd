@@ -2,7 +2,7 @@
 % Please edit documentation in R/core.R
 \name{list2inst}
 \alias{list2inst}
-\title{Build an foo::instance from a list}
+\title{Build an Q7::instance from a list}
 \usage{
 list2inst(x, s3 = "default", parent = parent.frame(), ...)
 }
@@ -10,5 +10,5 @@ list2inst(x, s3 = "default", parent = parent.frame(), ...)
 \item{...}{}
 }
 \description{
-Build an foo::instance from a list
+Build an Q7::instance from a list
 }

@@ -7,12 +7,12 @@
 localize(type, envir = parent.frame())
 }
 \arguments{
-\item{type}{foo::type}
+\item{type}{Q7::type}
 
 \item{envir}{environment}
 }
 \value{
-foo::type
+Q7::type
 }
 \description{
 Localize a Type's Environment

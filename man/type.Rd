@@ -2,7 +2,7 @@
 % Please edit documentation in R/core.R
 \name{type}
 \alias{type}
-\title{Create an foo Type}
+\title{Create an Q7 Type}
 \usage{
 type(fn = function() { }, s3 = "default")
 }
@@ -10,7 +10,7 @@ type(fn = function() { }, s3 = "default")
 \item{fn}{a constructor function}
 }
 \value{
-foo::type, function
+Q7::type, function
 }
 \description{
 This function is a object generator

@@ -1,12 +1,13 @@
-Package: foo
-Title: Freestyle Object Oriented Programming
+Package: Q7
+Title: Types for Freestyle Object Oriented Programming
 Version: 0.1.0.9000
 Authors@R: 
    c(person("Siqi", "Zhang", 
             email = "iqis.gnahz@gmail.com", 
             role = c("aut", "cre"),
             comment = c(ORCID = "0000-0003-2617-5776")),
-     person())
+     person("Bayer HealthCare", 
+            role = c("fnd")))
 Description: Provides types & features with which the user may freely piece together as objects. 
 License: GPL-3
 Encoding: UTF-8

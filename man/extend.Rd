@@ -7,7 +7,7 @@
 extend(prototype)
 }
 \arguments{
-\item{prototype}{foo::type}
+\item{prototype}{Q7::type}
 }
 \value{
 function

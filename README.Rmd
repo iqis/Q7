@@ -13,14 +13,55 @@ knitr::opts_chunk$set(
 )
 ```
 
-# foo
+# Q7
 
 <!-- badges: start -->
 <!-- [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental) -->
 <!-- badges: end -->
 
+`Q7` provides _Freestyle Object Oriented_ Programming, a fluid, powerful and _postmodern_ paradigm that borrows from Go and Rust, featuring:
 
-`foo` provides _Freestyle Object Oriented_ Programming, a fluid, powerful and _postmodern_ paradigm that borrows from Go and Rust, featuring:
+```{r}
+library(Q7)
+```
+
+
+Make a type:
+```{r}
+typeOne <- type(function(arg1, arg2){
+  
+  
+})
+```
+`type()` takes a function, which is used to construct an instance. 
+
+Everything defined within the function's closure becomes elements of the object.
+Arguments supplied to the function are accesible to the closure, but not become elements of the object themselves. 
+```{r}
+type_one <- typeOne(1, 2)
+type_one$...
+```
+
+The object can be modified post-hoc. 
+
+```{r}
+type_one %>% implement({
+  
+  
+})
+```
+
+The features implemented can be packaged with `feature()`. 
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+
 
 #### Smart Objects
   - self-aware 
@@ -72,26 +113,106 @@ knitr::opts_chunk$set(
     - any expression (including _features_, but more importantly, any arbitrary expression)
   - Appends the expresseion to the object
 
-`foo` users should leave behind the grand narrative of classical OOP orthodoxy, and exploit the benefits of objects as a unit of code, and an instrument for namespace resolution.
+`Q7` users should leave behind the grand narrative of classical OOP orthodoxy, and exploit the benefits of objects as a unit of code, and an instrument for namespace resolution.
   
-  
+### versus R6
+Q7: implicit definition private elements
+R6: explicit definition of private 
+
+Q7: can add or change features on-the-fly
+R6: Must unlock object first; No apparent equivalent
+
+
+
+
+
 
 ## Installation
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("iqis/foo")
+devtools::install_github("iqis/Q7")
 ```
 ## Examples
 
-Walk through the following comment-free examples and see if you can figure out how `foo` works.
+Walk through the following comment-free examples and see if you can figure out how `Q7` works.
 
 ```{r include=FALSE}
-require(foo)
+require(Q7)
 ```
 
 
 ### Dogs & Humans
+
+
+```{r}
+require(Q7)
+
+Dog <- type(function(name, breed){
+    self_intro <- function() {
+        paste("My name is", name, "and I'm a", breed)
+    }
+    fav_food <- NULL
+    fav_food2 <- NULL
+    set_fav_foods <- function(food, food2) {
+        .my$fav_food <- food
+        fav_food2 <<- food2
+    }
+    collar <-  type(function() {
+        color <- "red"
+        buckle <- type(function(material = "gold"){
+            material <- material
+        })()
+        brand <- "unknown"
+    })()
+})
+
+dog
+
+
+my_dog <- Dog("Captain Cook", "Boston Terrier")
+my_dog$self_intro()
+my_dog$fav_food
+my_dog$set_fav_foods("Sausage", "Bacon")
+my_dog$fav_food
+my_dog$fav_food2
+
+new_dog <- clone(my_dog)
+new_dog
+my_dog
+
+new_dog$name <- "Snowy"
+new_dog$breed <- "Westie"
+new_dog$self_intro()
+my_dog$self_intro()
+
+my_dog$collar
+new_dog$collar$color <- "black"
+
+my_dog$collar$color
+new_dog$collar$color
+
+identical(my_dog$collar$buckle, new_dog$collar$buckle)
+
+my_dog %>% implement({
+    owner <- NULL
+    come_to_owner <- function(){
+        paste(name, "runs toward", owner, 
+              "in a collar that is", collar$color)
+    }
+})
+
+my_dog$owner <- "Jack"
+my_dog$come_to_owner()
+
+ur_dog <- dog("Fifi", "Bulldog")
+ur_dog$collar$color
+
+
+```
+
+
+
 ```{r}
 Dog <- type(function(name, breed){
     say <- function(greeting = "Woof!"){
@@ -460,5 +581,59 @@ counter$get_count()
 counter$add_one()
 counter$add_one()
 counter$get_count()
+```
+
+
+```{r}
+R6Example <- R6::R6Class("R6Example", 
+                         public = list(
+                             a = 1, 
+                             b = 2, 
+                             f1 = function(){
+                                 self$c <- self$a + self$b
+                             }, 
+                             c = NULL,
+                             f2 = function(){
+                                 private$d <- self$a + self$b
+                             }, 
+                             f3 = function(){
+                                 private$d
+                             }, 
+                             initialize = function(){
+                                 cat("initializing...")
+                             }
+                         ), 
+                         private = list(
+                             d = NULL
+                         )
+)
+
+r6 <- R6Example$new()
+
+
+
+
+require(foo)
+Q7Example <- type(function(var4){
+    cat("initializing...")
+    var1 <- 1
+    var2 <- 2
+    fn1 <- function(){
+        var3 <<-  var1 + var2
+    }
+    var3 <- NULL
+    fn2 <- function(){
+        var4 <<- var1 + var2
+    }
+    fn3 <- function(){
+        var4
+    }
+})
+
+
+Q7 <- Q7Example()
+Q7$fn2()
+Q7$fn3()
+
 ```
 

@@ -1,10 +1,10 @@
-#' Create an foo Type
+#' Create an Q7 Type
 #'
 #' This function is a object generator
 #'
 #' @param fn a constructor function
 #'
-#' @return foo::type, function
+#' @return Q7::type, function
 #' @export
 #'
 #' @examples
@@ -16,14 +16,14 @@ type <- function(fn = function(){}, s3 = "default"){
                            "(function(){",
                            ".my <- environment()",
                            strip_braces(fn_body),
-                           paste0("class(.my) <- c('", s3, "', 'foo::instance')"),
+                           paste0("class(.my) <- c('", s3, "', 'Q7::instance')"),
                            "return(.my)",
                            "})()",
                            "}"),
                   keep.source = FALSE)
 
         structure(fn,
-                  class = c(s3,"foo::type", class(fn)))
+                  class = c(s3,"Q7::type", class(fn)))
 }
 
 
@@ -32,7 +32,7 @@ type <- function(fn = function(){}, s3 = "default"){
 #'
 #' Used only inside a type definition
 #'
-#' @param prototype foo::type
+#' @param prototype Q7::type
 #'
 #' @return function
 #' @export
@@ -49,7 +49,7 @@ extend <- function(prototype){
     }
 }
 
-#' Build an foo::instance from a list
+#' Build an Q7::instance from a list
 #'
 #' @param x
 #' @param parent
@@ -117,7 +117,7 @@ feature <- function(expr){
         }
         invisible(structure(obj, class = obj_classes))
     }
-    structure(fn, class = "foo::feature")
+    structure(fn, class = "Q7::feature")
 }
 
 
@@ -170,7 +170,7 @@ clone <- function(...){
 #' @export
 #'
 #' @examples
-`clone.foo::instance` <- function(obj, deep = TRUE){
+`clone.Q7::instance` <- function(obj, deep = TRUE){
     obj_clone <- new.env(parent = parent.env(obj))
     obj_clone$.my <- obj_clone
     names <- setdiff(ls(obj,all.names = TRUE), ".my")
@@ -198,7 +198,7 @@ clone <- function(...){
 #'
 #' @examples
 is_type <- function(x){
-    inherits(x, "foo::type")
+    inherits(x, "Q7::type")
 }
 
 #' Title
@@ -210,16 +210,16 @@ is_type <- function(x){
 #'
 #' @examples
 is_instance <- function(x){
-    inherits(x, "foo::instance")
+    inherits(x, "Q7::instance")
 }
 
 
 #' Localize a Type's Environment
 #'
-#' @param type foo::type
+#' @param type Q7::type
 #' @param envir environment
 #'
-#' @return foo::type
+#' @return Q7::type
 #' @export
 #'
 #' @examples
@@ -239,12 +239,12 @@ localize <- function(type, envir = parent.frame()){
 #'
 #' @examples
 is_feature <- function(x){
-    inherits(x, "foo::feature")
+    inherits(x, "Q7::feature")
 }
 
 
-`print.foo::type` <- function(x, ...) {
-    cat(paste0("<foo::type>", "\n"))
+`print.Q7::type` <- function(x, ...) {
+    cat(paste0("<Q7::type>", "\n"))
     print(environment(x))
     print.function(unclass(x))
 }
