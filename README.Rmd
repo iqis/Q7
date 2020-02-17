@@ -205,7 +205,7 @@ my_dog %>% implement({
 my_dog$owner <- "Jack"
 my_dog$come_to_owner()
 
-ur_dog <- dog("Fifi", "Bulldog")
+ur_dog <- Dog("Fifi", "Bulldog")
 ur_dog$collar$color
 
 

@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# foo
+# Q7
 
 <!-- badges: start -->
 
@@ -9,9 +9,45 @@
 
 <!-- badges: end -->
 
-`foo` provides *Freestyle Object Oriented* Programming, a fluid,
-powerful and *postmodern* paradigm that has many creative uses,
-featuring:
+`Q7` provides *Freestyle Object Oriented* Programming, a fluid, powerful
+and *postmodern* paradigm that borrows from Go and Rust, featuring:
+
+``` r
+library(Q7)
+#> Loading required package: magrittr
+```
+
+Make a type:
+
+``` r
+typeOne <- type(function(arg1, arg2){
+  
+  
+})
+```
+
+`type()` takes a function, which is used to construct an instance.
+
+Everything defined within the function’s closure becomes elements of the
+object. Arguments supplied to the function are accesible to the closure,
+but not become elements of the object themselves.
+
+``` r
+type_one <- typeOne(1, 2)
+type_one$...
+#> NULL
+```
+
+The object can be modified post-hoc.
+
+``` r
+type_one %>% implement({
+  
+  
+})
+```
+
+The features implemented can be packaged with `feature()`.
 
 #### Smart Objects
 
@@ -20,7 +56,7 @@ featuring:
   - active
       - Bind functions within
   - extensible
-      - Make variants of an object (class, and instance)
+      - Make variants of an object (class and instance)
 
 #### No Magic
 
@@ -72,19 +108,141 @@ featuring:
             any arbitrary expression)
       - Appends the expresseion to the object
 
+`Q7` users should leave behind the grand narrative of classical OOP
+orthodoxy, and exploit the benefits of objects as a unit of code, and an
+instrument for namespace resolution.
+
+### versus R6
+
+Q7: implicit definition private elements R6: explicit definition of
+private
+
+Q7: can add or change features on-the-fly R6: Must unlock object first;
+No apparent equivalent
+
 ## Installation
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("iqis/foo")
+devtools::install_github("iqis/Q7")
 ```
 
 ## Examples
 
 Walk through the following comment-free examples and see if you can
-figure out how `foo` works.
+figure out how `Q7` works.
 
 ### Dogs & Humans
+
+``` r
+require(Q7)
+
+Dog <- type(function(name, breed){
+    self_intro <- function() {
+        paste("My name is", name, "and I'm a", breed)
+    }
+    fav_food <- NULL
+    fav_food2 <- NULL
+    set_fav_foods <- function(food, food2) {
+        .my$fav_food <- food
+        fav_food2 <<- food2
+    }
+    collar <-  type(function() {
+        color <- "red"
+        buckle <- type(function(material = "gold"){
+            material <- material
+        })()
+        brand <- "unknown"
+    })()
+})
+
+Dog
+#> function (name, breed) 
+#> {
+#>     (function() {
+#>         .my <- environment()
+#>         self_intro <- function() {
+#>             paste("My name is", name, "and I'm a", breed)
+#>         }
+#>         fav_food <- NULL
+#>         fav_food2 <- NULL
+#>         set_fav_foods <- function(food, food2) {
+#>             .my$fav_food <- food
+#>             fav_food2 <<- food2
+#>         }
+#>         collar <- type(function() {
+#>             color <- "red"
+#>             buckle <- type(function(material = "gold") {
+#>                 material <- material
+#>             })()
+#>             brand <- "unknown"
+#>         })()
+#>         class(.my) <- c("default", "Q7::instance")
+#>         return(.my)
+#>     })()
+#> }
+#> attr(,"class")
+#> [1] "default"  "Q7::type" "function"
+
+
+my_dog <- Dog("Captain Cook", "Boston Terrier")
+my_dog$self_intro()
+#> [1] "My name is Captain Cook and I'm a Boston Terrier"
+my_dog$fav_food
+#> NULL
+my_dog$set_fav_foods("Sausage", "Bacon")
+my_dog$fav_food
+#> [1] "Sausage"
+my_dog$fav_food2
+#> [1] "Bacon"
+
+new_dog <- clone(my_dog)
+new_dog
+#> <environment: 0x0000000012bdf260>
+#> attr(,"class")
+#> [1] "default"      "Q7::instance"
+my_dog
+#> <environment: 0x00000000129637d0>
+#> attr(,"class")
+#> [1] "default"      "Q7::instance"
+
+new_dog$name <- "Snowy"
+new_dog$breed <- "Westie"
+new_dog$self_intro()
+#> [1] "My name is Snowy and I'm a Westie"
+my_dog$self_intro()
+#> [1] "My name is Captain Cook and I'm a Boston Terrier"
+
+my_dog$collar
+#> <environment: 0x00000000129681f0>
+#> attr(,"class")
+#> [1] "default"      "Q7::instance"
+new_dog$collar$color <- "black"
+
+my_dog$collar$color
+#> [1] "red"
+new_dog$collar$color
+#> [1] "black"
+
+identical(my_dog$collar$buckle, new_dog$collar$buckle)
+#> [1] FALSE
+
+my_dog %>% implement({
+    owner <- NULL
+    come_to_owner <- function(){
+        paste(name, "runs toward", owner, 
+              "in a collar that is", collar$color)
+    }
+})
+
+my_dog$owner <- "Jack"
+my_dog$come_to_owner()
+#> [1] "Captain Cook runs toward Jack in a collar that is red"
+
+ur_dog <- Dog("Fifi", "Bulldog")
+ur_dog$collar$color
+#> [1] "red"
+```
 
 ``` r
 Dog <- type(function(name, breed){
@@ -177,9 +335,9 @@ archie <- Person("Archie", "Analyst")
 
 ``` r
 archie
-#> <environment: 0x0000000012d68e08>
+#> <environment: 0x000000001410b6c8>
 #> attr(,"class")
-#> [1] "default"       "foo::instance"
+#> [1] "default"      "Q7::instance"
 archie$description()
 #> [1] "Archie works as a(n) Analyst"
 archie$poop()
@@ -493,4 +651,66 @@ counter$add_one()
 counter$add_one()
 counter$get_count()
 #> [1] 2
+```
+
+``` r
+R6Example <- R6::R6Class("R6Example", 
+                         public = list(
+                             a = 1, 
+                             b = 2, 
+                             f1 = function(){
+                                 self$c <- self$a + self$b
+                             }, 
+                             c = NULL,
+                             f2 = function(){
+                                 private$d <- self$a + self$b
+                             }, 
+                             f3 = function(){
+                                 private$d
+                             }, 
+                             initialize = function(){
+                                 cat("initializing...")
+                             }
+                         ), 
+                         private = list(
+                             d = NULL
+                         )
+)
+
+r6 <- R6Example$new()
+#> initializing...
+
+
+
+
+require(foo)
+#> Loading required package: foo
+#> 
+#> Attaching package: 'foo'
+#> The following objects are masked from 'package:Q7':
+#> 
+#>     clone, extend, feature, feature_generic, implement, is_feature,
+#>     is_instance, is_type, list2inst, localize, type
+Q7Example <- type(function(var4){
+    cat("initializing...")
+    var1 <- 1
+    var2 <- 2
+    fn1 <- function(){
+        var3 <<-  var1 + var2
+    }
+    var3 <- NULL
+    fn2 <- function(){
+        var4 <<- var1 + var2
+    }
+    fn3 <- function(){
+        var4
+    }
+})
+
+
+Q7 <- Q7Example()
+#> initializing...
+Q7$fn2()
+Q7$fn3()
+#> [1] 3
 ```
