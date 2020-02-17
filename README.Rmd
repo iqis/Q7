@@ -167,7 +167,7 @@ Dog <- type(function(name, breed){
     })()
 })
 
-dog
+Dog
 
 
 my_dog <- Dog("Captain Cook", "Boston Terrier")
