@@ -28,7 +28,7 @@ type <- function(fn = function(){}, s3 = "default"){
 
 
 
-#' Extend upon a Protoype
+#' Extend a Type upon a Prototype
 #'
 #' Used only inside a type definition
 #'
