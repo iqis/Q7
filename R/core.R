@@ -81,14 +81,6 @@ feature_generic <- function(s3, ...){
 #'
 #' @examples
 feature <- function(x){
-    x_char <- deparse(substitute(x))
-
-    if (grepl("function\\(", x_char[1])) { # if x is a function
-        fn <- x # use x
-    } else {
-        fn <- function(){} # make a new one
-    }
-
     fn <- function(obj = parent.frame()$.my){
         obj_classes <- class(obj)
         if (is_instance(obj)) {
