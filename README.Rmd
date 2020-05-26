@@ -1,7 +1,6 @@
 ---
 output: github_document
 ---
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
@@ -19,12 +18,176 @@ knitr::opts_chunk$set(
 <!-- [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental) -->
 <!-- badges: end -->
 
-`Q7` provides _Freestyle Object Oriented_ Programming, a fluid, powerful and _postmodern_ paradigm that borrows from Go and Rust, featuring:
+`Q7` enables _Compositional Object Oriented Programming_, a fluid, powerful and _postmodern_ paradigm, featuring:
+
+#### Smart Objects
+  - functions within an object know:
+    - Where am I? What are my neighbors? 
+  - extensible 
+    - Make variants of an object
+
+#### No Magic
+  - Mechanism decomposes into basic R constructs 
+    - A _type_ is a function
+    - A _feature_ is a function
+    - An _instance_ is an environment
+  - Same great R syntax & semantics
+    - Perform any action on or within an object 
+    - Native scoping rules, almost no NSE
+  
+#### Compositional Manner of Construction
+  - ...in contrast to hereditary
+  - Freely add, change or delete elements, ad or post hoc
+  - Focuses on "has a", rather than than "is a" relationships 
+  - Objects can contain other objects
+  
+#### Unlocked Objects
+  - Object instances are unlocked environments
+  - Feel free to shoot your feet, if so desired
+  - Want safety? Lock'em yerself
+
+## Installation
+
+``` r
+# install.packages("devtools")
+devtools::install_github("iqis/Q7")
+```
+## Examples
+
+Let's make a `String` type and re-pack some base R functions into it, giving the object a distinct API; Some users may find it familar. 
 
 ```{r}
-library(Q7)
+require(Q7)
+String <- type(function(string){
+  if (length(string) != 1 || !is.character(string)) { 
+    # we only want this object to hold a 1-length character vector
+    stop("string must be a vector of length 1")
+  }
+  .my$string <- string
+  
+  .my$charAt <- function(index){
+    unlist(strsplit(.my$string, ""))[index + 1]
+  }
+  
+  .my$concat <- function(str){
+    stopifnot(inherits(str, 
+                       "String"))
+    
+    .my$string <- paste0(.my$string, 
+                         str$string)
+    .my
+  }
+  
+  .my$length <- function(){
+    nchar(.my$string)
+  }
+  
+  .my$isEmpty <- function(){
+    nchar(.my$string) == 0
+  }
+  
+  .my$matches <- function(pattern){
+    .my$string <- grepl(pattern, .my$string)
+    .my
+  }
+  
+  .my$replaceFirst <- function(regex, replacement){
+    .my$string <- sub(regex, 
+                      replacement, 
+                      .my$string)
+    .my
+  }
+  
+}, s3 = "String")
+
+print.String <- function(String){
+  print(String$string)
+}
 ```
 
+We have defined a type named _String_, which will produce instances with a S3 class _String_, as well as a S3 method for `print()`. The `$string` element is the vector that holds the data; All other elements are bound functions (methods) of the object. They understand that they live inside the `String` object. The `print.String()` function lives in the global scope, and simply reaches into the `String` object and print the `$string$` vector.
+
+`.my` object is a special object that refers to the instance itself. Although it can be safely excluded in most cases, with some precaution in place, the use of `.my` is highly recommended to avoid scope leak.
+
+
+
+#### Excluding `.my`
+Sometimes the repeated reference of `.my` in a type definition is cumbersome. 
+```{r}
+Yeller <- type(function(words){
+  aloud <- function(){paste0(words, "!!!")}
+  change_words <- function(new_words){
+    words <<- new_words # 
+  }
+})
+
+greet <- Yeller("Good morning")
+greet$aloud()
+greet$change_words("Good evening")
+greet$aloud()
+```
+
+
+```{r}
+motto <- String("Carpe")$concat(String(" "))$concat(String("Diem"))
+
+motto$length()
+motto$isEmpty()
+motto$charAt(5)
+motto$replaceFirst("\\s", "-")$charAt(5)
+motto
+```
+
+
+
+### Interface
+- `type()`
+  - Defines a _type_. (like _class_)
+  - Takes a function as constructor
+  - When invoked, the constructor's closure becomes an _instance_, which is an environment
+    - Contains every binding inside the closure, except for the arguments
+    - The arguments are not accessible outside of the object, making them private
+    - Also contains `.my`, which refers to the instance itself
+- `feature()`
+  - Defines a _feature_
+  - Takes any expression
+  - Appends the expression to the object
+    - Ad hoc: A _feature_ can be implemented on a _type_
+    - Post hoc: Can also be implemented on an _instance_ 
+- `implement()`
+  - Takes
+    - object, a _type_ or _instance_
+    - any expression (including _features_, but more importantly, any arbitrary expression)
+  - Appends the expresseion to the object
+
+`Q7` users may leave behind the grand narrative of classical OOP orthodoxy, and exploit the benefits of objects simply as a unit of code, and as an instrument for namespace resolution.
+  
+### Versus R6
+
+Q7: Compositonal: I put a collar on my dog.
+R6: Hereditary: I made my dog a special kind of dog that has a collar.
+
+Q7: Can add or change features on-the-fly
+R6: Must unlock object first; `No apparent equivalent
+
+Q7: Implicit private elements, through constructor arguments
+R6: Explicit private elements
+
+Q7: Succinct & sweet: one constructor function defines the whole object
+R6: Verbose & bitter: `public`, `private`, `active`, `$new()`, `$clone()`
+
+Q7: Developed by one amateur
+R6: Developed by a team of experts
+
+Q7: 
+
+
+## Some More Examples
+Walk through the following comment-free examples and see if you can figure out how `Q7` works.
+
+```{r include=FALSE}
+require(Q7)
+```
 
 Make a type:
 ```{r}
@@ -72,495 +235,6 @@ hasFeatureTwo <- feature({
 
 ```
 
-Contruct a 
-```{r}
-Type <- 
-
-
-```
-
-
-#### Smart Objects
-  - functions within an object know:
-    - Where am I? What are my neighbors? 
-  - extensible 
-    - Make variants of an object (class and instance)
-
-
-#### No Magic
-  - Mechanism decomposes into basic R constructs 
-    - A type is a function
-    - A feature is a function
-    - An instance is an environment
-  - Same great R syntax & semantics
-    - Straightforwardly perform any action on or within an object 
-    - Follows native scoping rules, almost no NSE
-  
-#### Compositional
-  - ...not quite hereditary
-  - Freely add, change or delete elements, ad/post hoc
-  - Focuses on "has_a", rather than than "is_a" relationships
-  - Objects can contain other objects (what is this called, Reference Semantics?)
-  
-#### Unlocked
-  - Instances are unlocked environments
-  - No one stops you from shooting your feet
-  - Want safety? Lock'em yourself
-
-### Interface
-
-- `type()`
-  - Defines a _type_. (like _class_)
-  - Takes a function
-  - Returns the same function, plus some other code
-  - When invoked, the function's closure becomes an _instance_, which is an environment
-    - Contains every binding inside the closure, except for the arguments
-    - The arguments are not accessible outside of the object, making them private
-    - Also contains `.my`, which refers to the instance itself
-- `feature()`
-  - Defines a _feature_
-  - Takes any expression
-  - Appends the expression to the object
-    - Ad hoc: A _feature_ can be implemented on a _type_
-    - Post hoc: Can also be implemented on an _instance_ 
-- `implement()`
-  - Takes
-    - object, a _type_ or _instance_
-    - any expression (including _features_, but more importantly, any arbitrary expression)
-  - Appends the expresseion to the object
-
-`Q7` users may leave behind the grand narrative of classical OOP orthodoxy, and exploit the benefits of objects simply as a unit of code, and as an instrument for namespace resolution.
-  
-### versus R6
-Q7: implicit definition private elements
-R6: explicit definition of private 
-
-Q7: can add or change features on-the-fly
-R6: Must unlock object first; No apparent equivalent
-
-
-## Installation
-
-``` r
-# install.packages("devtools")
-devtools::install_github("iqis/Q7")
-```
-## Examples
-
-Walk through the following comment-free examples and see if you can figure out how `Q7` works.
-
-```{r include=FALSE}
-require(Q7)
-```
-
-
-### Dogs & Humans
-
-
-```{r}
-require(Q7)
-
-Dog <- type(function(name, breed){
-    self_intro <- function() {
-        paste("My name is", name, "and I'm a", breed)
-    }
-    fav_food <- NULL
-    fav_food2 <- NULL
-    set_fav_foods <- function(food, food2) {
-        .my$fav_food <- food
-        fav_food2 <<- food2
-    }
-    collar <-  type(function() {
-        color <- "red"
-        buckle <- type(function(material = "gold"){
-            material <- material
-        })()
-        brand <- "unknown"
-    })()
-})
-
-Dog
-
-
-my_dog <- Dog("Captain Cook", "Boston Terrier")
-my_dog$self_intro()
-my_dog$fav_food
-my_dog$set_fav_foods("Sausage", "Bacon")
-my_dog$fav_food
-my_dog$fav_food2
-
-new_dog <- clone(my_dog)
-new_dog
-my_dog
-
-new_dog$name <- "Snowy"
-new_dog$breed <- "Westie"
-new_dog$self_intro()
-my_dog$self_intro()
-
-my_dog$collar
-new_dog$collar$color <- "black"
-
-my_dog$collar$color
-new_dog$collar$color
-
-identical(my_dog$collar$buckle, new_dog$collar$buckle)
-
-my_dog %>% implement({
-    owner <- NULL
-    come_to_owner <- function(){
-        paste(name, "runs toward", owner, 
-              "in a collar that is", collar$color)
-    }
-})
-
-my_dog$owner <- "Jack"
-my_dog$come_to_owner()
-
-ur_dog <- Dog("Fifi", "Bulldog")
-ur_dog$collar$color
-
-
-```
-
-
-
-```{r}
-Dog <- type(function(name, breed){
-    say <- function(greeting = "Woof!"){
-        cat(paste0(greeting, 
-                   " I am ", name, ", a ", breed, 
-                   ".\n"))
-    }    
-})
-```
-
-
-```{r}
-walter <- Dog("Walter", "Husky")
-ls(walter, all.names = TRUE)
-```
-
-
-```{r}
-walter$say()
-```
-
-```{r}
-max <- walter %>% clone()
-max$name <- "Max"
-max$say("Wussup Dawg!")
-```
-
-```{r}
-max %>% 
-  implement({
-    treats_eaten <- 0
-    eat_treat <- function(n = 1){
-      cat(paste(name, "eats", n, "treat(s).\n"))
-      treats_eaten <<- treats_eaten + n
-    }
-  }) %>% 
-  implement({
-    is_satisfied <- function(){
-      treats_eaten > 5
-    }
-  })
-```
-
-
-```{r}
-max$eat_treat()
-max$is_satisfied()
-max$eat_treat(2)
-max$is_satisfied()
-max$eat_treat(3)
-max$is_satisfied()
-```
-
-```{r}
-max$treats_eaten
-```
-
-```{r}
-isAnimal <- feature({
-    mortal <- TRUE
-    eat <- function() paste(.my$name, "eats.")
-    poop <- function() paste(name, "poops")
-})
-
-max %>% 
-  isAnimal()
-
-max$eat()
-max$poop()
-```
-
-```{r}
-Person <- type(function(name, job) {
-  description <- function(){
-    paste(name, "works as a(n)", job)
-  }
-}) %>% isAnimal()
-archie <- Person("Archie", "Analyst")
-```
-
-
-```{r}
-archie
-archie$description()
-archie$poop()
-```
-
-```{r}
-hasCollar <- feature({
-  Collar <- type(function(material, color){
-    description <- function() {
-      paste("is made of", material, "and in", color)
-    }
-  })
-  
-  take_for_a_walk <- function(){
-    cat(name, "wears a collar that", collar$description(), "\n")
-    cat("We're gonna go out for a walk!")
-  }
-})
-```
-
-```{r}
-walter %>%
-  implement({
-    hasCollar()
-    collar <- Collar("metal", "red")
-    rm(Collar)
-  })
-```
-
-
-```{r}
-walter$take_for_a_walk()
-```
-
-### Formally Extend a Type
-```{r}
-Type1 <- type(function(arg1){
-    val1 <- arg1
-    get_val1 <- function(){
-        val1
-    }
-}, "Type1")
-
-Type2 <- type(function(arg1, arg2){
-    extend(Type1)(arg1)
-    val2 <- arg2
-    get_val2 <- function(){
-        val2
-    }
-}, "Type2")
-```
-
-
-```{r}
-type2 <- Type2("one", "two")
-type2$val1
-type2$val2
-type2$get_val1()
-type2$get_val2()
-```
-
-
-### Overtime
-```{r}
-Employee <- type(function(weekly_hours){}, "Employee")
-john <- Employee(45)
-```
-
-```{r}
-Manager <- type(function(weekly_hours){
-  extend(Employee)(weekly_hours)
-  is_manager <- TRUE
-}, "Manager")
-
-mike <- Manager(45)
-```
-
-
-```{r}
-hasOvertime <- feature_generic("hasOvertime")
-  
-hasOvertime.Employee <- feature({
-  is_overtime <- function() weekly_hours > 40
-})
-hasOvertime.Manager <- feature({
-  .my$is_overtime <- function() FALSE
-})
-```
-
-
-```{r}
-john %>% hasOvertime()
-john$is_overtime()
-```
-
-```{r}
-mike %>% hasOvertime()
-mike$is_overtime()
-```
-
-
-```{r}
-Boss <- 
-  type(function(weekly_hours){
-    weekly_hours <- weekly_hours
-  }) %>% 
-  hasOvertime.Manager()
-jill <- Boss(80)
-jill$is_overtime()
-```
-
-### List-to-Instance
-```{r}
-my_data <- list(a = 1, 
-                add_to_a = function(value){
-                  .my$a <- a + value
-                })
-
-my_data_obj <- list2inst(my_data)
-
-my_data_obj$a
-my_data_obj$add_to_a(20)
-my_data_obj$a
-```
-
-### Grade School Geometry
-```{r}
-Circle <- 
-    type(function(radius){}, 
-         "Circle")
-    
-Square <- 
-    type(function(side){}, 
-         "Square")
-
-hasArea <- feature_generic("hasArea")
-
-hasArea.Square <- 
-    feature({
-        area <- function(){
-            .my$side ^ 2
-        }
-    })
-
-hasArea.Circle <- 
-    feature({
-        area <- function(){
-            .my$radius^2 * pi
-        }
-    })
-
-circle <- Circle(1) %>% hasArea()
-circle$area()
-
-square <- Square(1) %>% hasArea()
-square$area()
-
-
-hasArea.EquilateralTriangle <- feature({
-    area <- function(){
-        (side^2 * sqrt(3)) / 4
-    }
-})
-
-EquilateralTriangle <- 
-    type(function(side){}, 
-         "EquilateralTriangle") %>%
-    hasArea()
-
-equilateral_triangle <- EquilateralTriangle(1)
-equilateral_triangle$area()
-
-```
-
-
-### Locked 
-
-```{r}
-isLocked <- feature({
-    lockEnvironment(.my, bindings = TRUE)
-})
-
-Test <- type(function(){
-    a <- 1
-}) %>% isLocked()
-
-test <- Test()
-try(test$a <- 666)
-try(test$b <- 666)
-try({
-  test %>% 
-    implement({
-      a <- 666
-    })
-})
-```
-
-
-### State Machine
-```{r}
-State <- type(function(){
-    name <- "DEFAULT"
-    cat("Processing Current State...\n")
-    print_current_state <- function(){
-        cat(paste("Current State:", name, "\n"))
-    }
-})
-
-LockedState <- State %>%
-    implement({
-        name <- "Locked"
-        print_current_state()
-        on_event <- function(event) {
-            if (event == "8888") {
-                return(UnlockedState())
-            } else {
-                cat("Wrong Password.\n")
-                return(.my)
-            }
-        }
-    })
-
-UnlockedState <- State %>%
-    implement({
-        name <- "Unlocked"
-        print_current_state()
-        on_event <- function(event) {
-            if (event == "lock") {
-                return(LockedState())
-            } else {
-                cat("Invalid Operation. \n")
-                return(.my)
-            }
-        }
-    })
-
-SimpleDevice <- type(function(){
-    state <- LockedState()
-    on_event <- function(event){
-        .my$state <- state$on_event(event)
-    }
-})
-```
-
-
-```{r}
-device <- SimpleDevice()
-
-device$on_event("0000")
-device$on_event("8888")
-device$on_event("do something")
-device$on_event("lock")
-```
-
 ### Private Elements
 ```{r}
 
@@ -585,7 +259,6 @@ counter$add_one()
 counter$get_count()
 ```
 
-
 ### Get Access to Private Environment
 ```{r}
 exposePrivateEnv <- feature({
@@ -597,45 +270,43 @@ counter$.pvt
 counter$.pvt$count
 ```
 
-
+#### R6 vs Q7
 ```{r}
 R6Example <- R6::R6Class("R6Example", 
                          public = list(
-                             a = 1, 
-                             b = 2, 
+                             var1 = 1, 
+                             var2 = 2, 
                              f1 = function(){
-                                 self$c <- self$a + self$b
+                                 self$var3 <- self$var1 + self$var2
                              }, 
                              c = NULL,
                              f2 = function(){
-                                 private$d <- self$a + self$b
+                                 private$var4 <- self$var1 + self$var2
                              }, 
                              f3 = function(){
-                                 private$d
+                                 private$var4
                              }, 
                              initialize = function(){
                                  cat("initializing...")
                              }
                          ), 
                          private = list(
-                             d = NULL
+                             var4 = NULL
                          )
 )
 
 r6 <- R6Example$new()
 
 
-
-
-require(foo)
+require(Q7)
 Q7Example <- type(function(var4){
     cat("initializing...")
     var1 <- 1
     var2 <- 2
+    var3 <- NULL
     fn1 <- function(){
         var3 <<-  var1 + var2
     }
-    var3 <- NULL
     fn2 <- function(){
         var4 <<- var1 + var2
     }
@@ -645,9 +316,37 @@ Q7Example <- type(function(var4){
 })
 
 
-Q7 <- Q7Example()
-Q7$fn2()
-Q7$fn3()
+q7 <- Q7Example()
+q7$fn1()
+q7$fn2()
+q7$fn3()
+ls(q7)
+```
 
+Why is there no parameterized features?
+
+_feature_ is subordinate to and dependent on _type_. It is encouraged to put all data elements in a _type_ definition, while _feature_ mainly contain just functions. If you feel significant need to parameterize a feature, think whether it's better to create a nested object or to formally extend a type. You can always re-define something in a feature post hoc. 
+
+```{r}
+Word <- type(function(word){})
+hasRepeat <- feature({
+  N_TIMES <- 2
+  repeat_word <- function(){
+    cat(rep(word, N_TIMES))
+  }
+})
+```
+
+```{r}
+apple <- Word("apple") %>% hasRepeat()
+apple$repeat_word()
+```
+```{r}
+pear <- Word("pear") %>% 
+  hasRepeat() %>% 
+  implement({
+    N_TIMES <- 5
+  })
+pear$repeat_word()
 ```
 

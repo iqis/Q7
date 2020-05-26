@@ -2,12 +2,12 @@
 % Please edit documentation in R/core.R
 \name{extend}
 \alias{extend}
-\title{Extend upon a Protoype}
+\title{Extend a Type upon a Prototype}
 \usage{
 extend(prototype)
 }
 \arguments{
-\item{prototype}{Q7::type}
+\item{prototype}{Q7type}
 }
 \value{
 function

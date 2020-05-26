@@ -1,0 +1,425 @@
+---
+title: "Examples"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(Q7)
+```
+
+
+### Dogs & Humans
+
+```{r}
+Dog <- type(function(name, breed){
+    self_intro <- function() {
+        paste("My name is", name, "and I'm a", breed)
+    }
+    fav_food <- NULL
+    fav_food2 <- NULL
+    set_fav_foods <- function(food, food2) {
+        .my$fav_food <- food
+        fav_food2 <<- food2
+    }
+    collar <-  type(function() {
+        color <- "red"
+        buckle <- type(function(material = "gold"){
+            material <- material
+        })()
+        brand <- "unknown"
+    })()
+})
+
+Dog
+
+
+my_dog <- Dog("Captain Cook", "Boston Terrier")
+my_dog$self_intro()
+my_dog$fav_food
+my_dog$set_fav_foods("Sausage", "Bacon")
+my_dog$fav_food
+my_dog$fav_food2
+
+new_dog <- clone(my_dog)
+new_dog
+my_dog
+
+new_dog$name <- "Snowy"
+new_dog$breed <- "Westie"
+new_dog$self_intro()
+my_dog$self_intro()
+
+my_dog$collar
+new_dog$collar$color <- "black"
+
+my_dog$collar$color
+new_dog$collar$color
+
+identical(my_dog$collar$buckle, new_dog$collar$buckle)
+
+my_dog %>% implement({
+    owner <- NULL
+    come_to_owner <- function(){
+        paste(name, "runs toward", owner, 
+              "in a collar that is", collar$color)
+    }
+})
+
+my_dog$owner <- "Jack"
+my_dog$come_to_owner()
+
+ur_dog <- Dog("Fifi", "Bulldog")
+ur_dog$collar$color
+
+
+```
+
+
+
+```{r}
+Dog <- type(function(name, breed){
+    say <- function(greeting = "Woof!"){
+        cat(paste0(greeting, 
+                   " I am ", name, ", a ", breed, 
+                   ".\n"))
+    }    
+})
+```
+
+
+```{r}
+walter <- Dog("Walter", "Husky")
+ls(walter, all.names = TRUE)
+```
+
+
+```{r}
+walter$say()
+```
+
+```{r}
+max <- walter %>% clone()
+max$name <- "Max"
+max$say("Wussup Dawg!")
+```
+
+```{r}
+max %>% 
+  implement({
+    treats_eaten <- 0
+    eat_treat <- function(n = 1){
+      cat(paste(name, "eats", n, "treat(s).\n"))
+      treats_eaten <<- treats_eaten + n
+    }
+  }) %>% 
+  implement({
+    is_satisfied <- function(){
+      treats_eaten > 5
+    }
+  })
+```
+
+
+```{r}
+max$eat_treat()
+max$is_satisfied()
+max$eat_treat(2)
+max$is_satisfied()
+max$eat_treat(3)
+max$is_satisfied()
+```
+
+```{r}
+max$treats_eaten
+```
+
+```{r}
+isAnimal <- feature({
+    mortal <- TRUE
+    eat <- function() paste(.my$name, "eats.")
+    poop <- function() paste(name, "poops")
+})
+
+max %>% 
+  isAnimal()
+
+max$eat()
+max$poop()
+```
+
+```{r}
+Person <- type(function(name, job) {
+  description <- function(){
+    paste(name, "works as a(n)", job)
+  }
+}) %>% isAnimal()
+archie <- Person("Archie", "Analyst")
+```
+
+
+```{r}
+archie
+archie$description()
+archie$poop()
+```
+
+```{r}
+hasCollar <- feature({
+  Collar <- type(function(material, color){
+    description <- function() {
+      paste("is made of", material, "and in", color)
+    }
+  })
+  
+  take_for_a_walk <- function(){
+    cat(name, "wears a collar that", collar$description(), "\n")
+    cat("We're gonna go out for a walk!")
+  }
+})
+```
+
+```{r}
+walter %>%
+  implement({
+    hasCollar()
+    collar <- Collar("metal", "red")
+    rm(Collar)
+  })
+```
+
+
+```{r}
+walter$take_for_a_walk()
+```
+
+### Formally Extend a Type
+```{r}
+Type1 <- type(function(arg1){
+    val1 <- arg1
+    get_val1 <- function(){
+        val1
+    }
+}, "Type1")
+
+Type2 <- type(function(arg1, arg2){
+    extend(Type1)(arg1)
+    val2 <- arg2
+    get_val2 <- function(){
+        val2
+    }
+}, "Type2")
+```
+
+
+```{r}
+type2 <- Type2("one", "two")
+type2$val1
+type2$val2
+type2$get_val1()
+type2$get_val2()
+```
+
+
+### Overtime
+```{r}
+Employee <- type(function(weekly_hours){}, "Employee")
+john <- Employee(45)
+```
+
+```{r}
+Manager <- type(function(weekly_hours){
+  extend(Employee)(weekly_hours)
+  is_manager <- TRUE
+}, "Manager")
+
+mike <- Manager(45)
+```
+
+
+```{r}
+hasOvertime <- feature_generic("hasOvertime")
+  
+hasOvertime.Employee <- feature({
+  is_overtime <- function() weekly_hours > 40
+})
+
+hasOvertime.Manager <- feature({
+  .my$is_overtime <- function() FALSE
+})
+```
+
+
+```{r}
+john %>% hasOvertime()
+john$is_overtime()
+```
+
+```{r}
+mike %>% hasOvertime()
+mike$is_overtime()
+```
+
+
+```{r}
+Boss <- 
+  type(function(weekly_hours){
+    weekly_hours <- weekly_hours
+  }) %>% 
+  hasOvertime.Manager()
+jill <- Boss(80)
+jill$is_overtime()
+```
+
+### List-to-Instance
+```{r}
+my_data <- list(a = 1, 
+                add_to_a = function(value){
+                  .my$a <- a + value
+                })
+
+my_data_obj <- list2inst(my_data)
+
+my_data_obj$a
+my_data_obj$add_to_a(20)
+my_data_obj$a
+```
+
+### Grade School Geometry
+```{r}
+Circle <- 
+    type(function(radius){}, 
+         "Circle")
+    
+Square <- 
+    type(function(side){}, 
+         "Square")
+
+hasArea <- feature_generic("hasArea")
+
+hasArea.Square <- 
+    feature({
+        area <- function(){
+            .my$side ^ 2
+        }
+    })
+
+hasArea.Circle <- 
+    feature({
+        area <- function(){
+            .my$radius^2 * pi
+        }
+    })
+
+circle <- Circle(1) %>% hasArea()
+circle$area()
+
+square <- Square(1) %>% hasArea()
+square$area()
+
+
+hasArea.EquilateralTriangle <- feature({
+    area <- function(){
+        (side^2 * sqrt(3)) / 4
+    }
+})
+
+EquilateralTriangle <- 
+    type(function(side){}, 
+         "EquilateralTriangle") %>%
+    hasArea()
+
+equilateral_triangle <- EquilateralTriangle(1)
+equilateral_triangle$area()
+
+```
+
+
+### Locked 
+
+```{r}
+isLocked <- feature({
+    lockEnvironment(.my, bindings = TRUE)
+})
+
+Test <- type(function(){
+    a <- 1
+}) %>% isLocked()
+
+test <- Test()
+try(test$a <- 666)
+try(test$b <- 666)
+try({
+  test %>% 
+    implement({
+      a <- 666
+    })
+})
+```
+
+
+### State Machine
+```{r}
+State <- type(function(){
+    name <- "DEFAULT"
+    cat("Processing Current State...\n")
+    print_current_state <- function(){
+        cat(paste("Current State:", name, "\n"))
+    }
+})
+
+LockedState <- State %>%
+    implement({
+        name <- "Locked"
+        print_current_state()
+        on_event <- function(event) {
+            if (event == "8888") {
+                return(UnlockedState())
+            } else {
+                cat("Wrong Password.\n")
+                return(.my)
+            }
+        }
+    })
+
+UnlockedState <- State %>%
+    implement({
+        name <- "Unlocked"
+        print_current_state()
+        on_event <- function(event) {
+            if (event == "lock") {
+                return(LockedState())
+            } else {
+                cat("Invalid Operation. \n")
+                return(.my)
+            }
+        }
+    })
+
+SimpleDevice <- type(function(){
+    state <- LockedState()
+    on_event <- function(event){
+        .my$state <- state$on_event(event)
+    }
+})
+```
+
+
+```{r}
+device <- SimpleDevice()
+
+device$on_event("0000")
+device$on_event("8888")
+device$on_event("do something")
+device$on_event("lock")
+```
