@@ -343,8 +343,8 @@ apple$repeat_word()
 ```
 ```{r}
 pear <- Word("pear") %>% 
-  hasRepeat() %>% 
   implement({
+    hasRepeat()
     N_TIMES <- 5
   })
 pear$repeat_word()

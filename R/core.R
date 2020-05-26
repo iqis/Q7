@@ -10,13 +10,21 @@
 #'
 #' @examples
 #'
-type <- function(fn = function(){}, s3 = "default"){
+type <- function(x = function(){}, s3 = "default"){
+        x_char <- deparse(substitute(x))
+
+        if (grepl("function\\(", x_char[1])) { # if x is a function
+            fn <- x # use x
+        } else {
+            fn <- function(){} # make a new one
+        }
+
         fn_body <- deparse(body(fn))
         body(fn) <-
             parse(text = c("{",
                            "(function(){",
                            ".my <- environment()",
-                           strip_braces(fn_body),
+                           strip_ends(fn_body),
                            paste0("class(.my) <- c('", s3, "', 'Q7instance')"),
                            "return(.my)",
                            "})()",
@@ -72,19 +80,26 @@ feature_generic <- function(s3, ...){
 #' @export
 #'
 #' @examples
-feature <- function(expr){
-    expr <- substitute(expr)
+feature <- function(x){
+    x_char <- deparse(substitute(x))
+
+    if (grepl("function\\(", x_char[1])) { # if x is a function
+        fn <- x # use x
+    } else {
+        fn <- function(){} # make a new one
+    }
+
     fn <- function(obj = parent.frame()$.my){
         obj_classes <- class(obj)
         if (is_instance(obj)) {
             eval(expr, envir = obj)
         } else if (is_type(obj)) {
-            expr <- strip_braces(deparse(expr))
-            fn_body <- strip_braces(deparse(body(obj)))
-            fn_body <- inject_text(text_1 = fn_body,
+            expr <- strip_ends(deparse(expr))
+            obj_fn_body <- strip_ends(deparse(body(obj)))
+            obj_fn_body <- inject_text(text_1 = obj_fn_body,
                                    text_2 = expr,
-                                   index = length(fn_body) - 2)
-            body(obj) <- parse(text = c("{", fn_body, "}"))
+                                   index = length(obj_fn_body) - 2)
+            body(obj) <- parse(text = c("{", obj_fn_body, "}"))
         }
         invisible(structure(obj, class = obj_classes))
     }
