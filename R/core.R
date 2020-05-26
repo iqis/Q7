@@ -80,8 +80,9 @@ feature_generic <- function(s3, ...){
 #' @export
 #'
 #' @examples
-feature <- function(x){
-    fn <- function(obj = parent.frame()$.my){
+feature <- function(expr){
+    expr <- substitute(expr)
+    feature_fn <- function(obj = parent.frame()$.my){
         obj_classes <- class(obj)
         if (is_instance(obj)) {
             eval(expr, envir = obj)
@@ -95,7 +96,7 @@ feature <- function(x){
         }
         invisible(structure(obj, class = obj_classes))
     }
-    structure(fn, class = "Q7feature")
+    structure(feature_fn, class = "Q7feature")
 }
 
 
