@@ -2,16 +2,39 @@
 % Please edit documentation in R/core.R
 \name{extend}
 \alias{extend}
-\title{Extend a Type upon a Prototype}
+\title{Extend a Type upon a (Proto)type}
 \usage{
 extend(prototype)
 }
 \arguments{
-\item{prototype}{Q7type}
+\item{prototype}{Q7type; function}
 }
 \value{
-function
+localized Q7type; function
 }
 \description{
 Used only inside a type definition
+}
+\examples{
+
+Type1 <- type(function(arg1){
+    val1 <- arg1
+    get_val1 <- function(){
+        val1
+    }
+}, "Type1")
+
+Type2 <- type(function(arg1, arg2){
+    extend(Type1)(arg1)
+    val2 <- arg2
+    get_val2 <- function(){
+        val2
+    }
+}, "Type2")
+
+myType2 <- Type2("foo", "bar")
+
+myType2$get_val1()
+myType2$get_val2()
+
 }

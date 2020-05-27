@@ -7,7 +7,7 @@
 clone(...)
 }
 \arguments{
-\item{...}{}
+\item{...}{dot-dot-dot}
 }
 \description{
 Clone

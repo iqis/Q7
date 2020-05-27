@@ -1,22 +1,30 @@
-#' Create an Q7 Type
+#' Create a Q7 Type
 #'
-#' This function is a object generator
+#' @param x function or expression; becomes the definition of the object
+#' @param s3 S3 class of the object; necessary when using
 #'
-#' @param fn a constructor function
-#' @param s3 S3 class of the object
-#'
-#' @return Q7type, function
+#' @return Q7 type; function
 #' @export
 #'
 #' @examples
+#'
+#' Adder <- type(function(num1, num2){
+#'     add_nums <- function(){
+#'         num1 + num2
+#'     }
+#'  })
+#'
+#' myAdder <- Adder(1, 2)
+#' myAdder$add_nums()
 #'
 type <- function(x = function(){}, s3 = "default"){
         x_char <- deparse(substitute(x))
 
         if (grepl("function\\(", x_char[1])) { # if x is a function
-            fn <- x # use x
+            fn <- x # then use x
         } else {
-            fn <- function(){} # make a new one
+            fn <- function(){} # or make a new one
+            body(fn) <- substitute(x)
         }
 
         fn_body <- deparse(body(fn))
@@ -32,40 +40,67 @@ type <- function(x = function(){}, s3 = "default"){
                   keep.source = FALSE)
 
         structure(fn,
-                  class = c("Q7type", class(fn)),
+                  class = c(s3, "Q7type", class(fn)),
                   s3 = s3)
 }
 
-#' Extend a Type upon a Prototype
+#' Extend a Type upon a (Proto)type
 #'
 #' Used only inside a type definition
 #'
-#' @param prototype Q7type
+#' @param prototype Q7type; function
 #'
-#' @return function
+#' @return localized Q7type; function
 #' @export
 #'
 #' @examples
+#'
+#' Type1 <- type(function(arg1){
+#'     val1 <- arg1
+#'     get_val1 <- function(){
+#'         val1
+#'     }
+#' }, "Type1")
+#'
+#' Type2 <- type(function(arg1, arg2){
+#'     extend(Type1)(arg1)
+#'     val2 <- arg2
+#'     get_val2 <- function(){
+#'         val2
+#'     }
+#' }, "Type2")
+#'
+#' myType2 <- Type2("foo", "bar")
+#'
+#' myType2$get_val1()
+#' myType2$get_val2()
+#'
 extend <- function(prototype){
     function(...){
         type_envir <- parent.frame()
         prototype_envir <- localize(prototype, envir = type_envir)(...)
-        if (length(ls(prototype_envir)) > 0) {
-            migrate_elements(prototype_envir, type_envir)
-            migrate_fns(prototype_envir, type_envir)
-        }
+        # if (length(ls(prototype_envir)) > 0) {
+        migrate_elements(prototype_envir, type_envir)
+        migrate_elements(parent.env(prototype_envir), parent.env(type_envir))
+        migrate_fns(prototype_envir, type_envir)
+        migrate_fns(parent.env(prototype_envir), parent.env(type_envir))
+        # }
     }
 }
 
 #' Create a Generic Feature
 #'
-#' @param s3
-#' @param ...
+#' Use this function when you need to create more than one methods
+#' for Q7 types with different S3 classes.
+#' The \code{s3} field and the feature's name should be the same.
 #'
-#' @return
+#' @param s3 S3 Class of the feature
+#' @param ... dot-dot-dot
+#'
+#' @return a generic Q7 feature
 #' @export
 #'
-#' @examples
+#' @seealso \code{\link{feature}}
 feature_generic <- function(s3, ...){
     function(x = parent.frame()$.my, ...){
         UseMethod(s3, x)
@@ -74,12 +109,54 @@ feature_generic <- function(s3, ...){
 
 #' Create an Object Feature
 #'
-#' @param expr
+#' @param expr expression
 #'
-#' @return
+#' @return a Q7 feature
 #' @export
 #'
 #' @examples
+#'
+#' Type1 <- type(function(num){})
+#'
+#' hasMagic <- feature({
+#'     change_number <- function(){
+#'         num + 1
+#'     }
+#' })
+#'
+#' myType1 <- Type1(1) %>% hasMagic()
+#' myType1$change_number()
+#'
+#'
+#' # Use S3 method dispatch for different behaviors
+#' hasMagic <- feature_generic(s3 = "hasMagic")
+#'
+#' hasMagic.Type1 <- feature({
+#'     change_number <- function(){
+#'         num + 1
+#'     }
+#' })
+#'
+#' hasMagic.Type2 <- feature({
+#'     change_number <- function(){
+#'         num - 1
+#'     }
+#' })
+#'
+#' Type1 <- type(function(num){},
+#'               s3 = "Type1") %>%
+#'     hasMagic()
+#'
+#' Type2 <- type(function(num){},
+#'               s3 = "Type2") %>%
+#'     hasMagic()
+#'
+#' myType1 <- Type1(1)
+#' myType1$change_number()
+#'
+#' myType2 <- Type2(1)
+#' myType2$change_number()
+#'
 feature <- function(expr){
     expr <- substitute(expr)
     feature_fn <- function(obj = parent.frame()$.my){
@@ -102,13 +179,23 @@ feature <- function(expr){
 
 #' Implement any Feature for an Object
 #'
-#' @param obj
-#' @param feat
+#' @param obj Q7 object (type or instance)
+#' @param feat Q7 feature or expression
 #'
-#' @return
+#' @return Q7 object (type or instance)
 #' @export
 #'
 #' @examples
+#'
+#' Type1 <- type(function(num){})
+#'
+#' myType1 <- Type1(1) %>% implement({
+#'     change_number <- function(){
+#'         num + 1
+#'     }
+#' })
+#'
+#' myType1$change_number()
 implement <- function(obj, feat) {
     feat <- substitute(feat)
     obj_classes <- class(obj)
@@ -119,8 +206,8 @@ implement <- function(obj, feat) {
             eval(feat, obj)
         }
     } else if (is_type(obj)) {
-        feat <- strip_braces(deparse(feat))
-        fn_body <- strip_braces(deparse(body(obj)))
+        feat <- strip_ends(deparse(feat))
+        fn_body <- strip_ends(deparse(body(obj)))
         fn_body <- inject_text(fn_body, feat, length(fn_body) - 3)
         body(obj) <- parse(text = c("{", fn_body, "}"))
     }

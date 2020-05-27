@@ -7,8 +7,18 @@
 feature_generic(s3, ...)
 }
 \arguments{
-\item{...}{}
+\item{s3}{S3 Class of the feature}
+
+\item{...}{dot-dot-dot}
+}
+\value{
+a generic Q7 feature
 }
 \description{
-Create a Generic Feature
+Use this function when you need to create more than one methods
+for Q7 types with different S3 classes.
+The \code{s3} field and the feature's name should be the same.
+}
+\seealso{
+\code{\link{feature}}
 }

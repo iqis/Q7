@@ -1,0 +1,94 @@
+---
+title: "Versus R6"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{versus_r6}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(Q7)
+```
+
+### 
+
+Q7: Compositonal: I put a plasma gun on my spaceship.
+R6: Hereditary: I made my spaceship a special kind of spaceship that has a plasma gun.
+
+Q7: Can add or change features on-the-fly
+R6: Must unlock object first; No apparent equivalent mechanism
+
+Q7: Free
+R6: Safe
+
+Q7: Succinct & sweet: one function defines & initializes the whole object
+R6: Verbose & bitter: `public`, `private`, `active`, `$new()`, `$clone()`...
+
+Q7: Implicit private elements, through constructor arguments
+R6: Explicit private elements
+
+Q7: Developed by one amateur
+R6: Developed by a team of experts
+
+
+```{r}
+R6Example <- R6::R6Class("R6Example", 
+                         public = list(
+                             var1 = 1, 
+                             var2 = 2,
+                             var3 = NULL,
+                             f1 = function(){
+                                 self$var3 <- self$var1 + self$var2
+                             }, 
+                             f2 = function(){
+                                 private$var4 <- self$var1 + self$var2
+                             }, 
+                             f3 = function(){
+                                 private$var4
+                             }, 
+                             initialize = function(){
+                                 cat("initializing...")
+                             }
+                         ), 
+                         private = list(
+                             var4 = NULL
+                         )
+)
+
+r6 <- R6Example$new()
+```
+
+
+```{r}
+require(Q7)
+Q7Example <- type(function(var4){
+    cat("initializing...")
+    var1 <- 1
+    var2 <- 2
+    var3 <- NULL
+    fn1 <- function(){
+        var3 <<-  var1 + var2
+    }
+    fn2 <- function(){
+        var4 <<- var1 + var2
+    }
+    fn3 <- function(){
+        var4
+    }
+})
+
+
+q7 <- Q7Example()
+q7$fn1()
+q7$fn2()
+q7$fn3()
+ls(q7)
+```

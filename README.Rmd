@@ -30,14 +30,13 @@ knitr::opts_chunk$set(
   - Mechanism decomposes into basic R constructs 
     - A _type_ is a function
     - A _feature_ is a function
-    - An _instance_ is an environment
+    - An _instance_, created by _type_ and _feature_, is an environment
   - Same great R syntax & semantics
     - Perform any action on or within an object 
     - Native scoping rules, almost no NSE
   
 #### Compositional Manner of Construction
-  - ...in contrast to hereditary
-  - Freely add, change or delete elements, ad or post hoc
+  - Freely add, change or delete members, ad or post hoc
   - Focuses on "has a", rather than than "is a" relationships 
   - Objects can contain other objects
   
@@ -54,7 +53,7 @@ devtools::install_github("iqis/Q7")
 ```
 ## Examples
 
-Let's make a `String` type and re-pack some base R functions into it, giving the object a distinct API; Some users may find it familar. 
+Let's make a `String` type and re-pack some base R functions into it, giving the object a distinct API, which some users may find familar with. 
 
 ```{r}
 require(Q7)
@@ -97,36 +96,20 @@ String <- type(function(string){
                       .my$string)
     .my
   }
-  
 }, s3 = "String")
 
 print.String <- function(String){
-  print(String$string)
+  if (inherits(String, "Q7instance")) {
+    print(String$string)
+  } else if (inherits(String, "Q7type")) {
+    print(String)
+  }
 }
 ```
 
-We have defined a type named _String_, which will produce instances with a S3 class _String_, as well as a S3 method for `print()`. The `$string` element is the vector that holds the data; All other elements are bound functions (methods) of the object. They understand that they live inside the `String` object. The `print.String()` function lives in the global scope, and simply reaches into the `String` object and print the `$string$` vector.
+We have defined a type named _String_, which will produce instances with a S3 class _String_, as well as a S3 method for `print()`. The `$string` member is the vector that holds the data; All other members are bound functions (methods) of the object. They understand that they live inside the `String` object. The `print.String()` function lives in the global scope, and simply reaches into the `String` object and print the `$string$` vector.
 
 `.my` object is a special object that refers to the instance itself. Although it can be safely excluded in most cases, with some precaution in place, the use of `.my` is highly recommended to avoid scope leak.
-
-
-
-#### Excluding `.my`
-Sometimes the repeated reference of `.my` in a type definition is cumbersome. 
-```{r}
-Yeller <- type(function(words){
-  aloud <- function(){paste0(words, "!!!")}
-  change_words <- function(new_words){
-    words <<- new_words # 
-  }
-})
-
-greet <- Yeller("Good morning")
-greet$aloud()
-greet$change_words("Good evening")
-greet$aloud()
-```
-
 
 ```{r}
 motto <- String("Carpe")$concat(String(" "))$concat(String("Diem"))
@@ -139,18 +122,17 @@ motto
 ```
 
 
-
-### Interface
+### API
 - `type()`
   - Defines a _type_. (like _class_)
-  - Takes a function as constructor
+  - Takes a function or expression as constructor
   - When invoked, the constructor's closure becomes an _instance_, which is an environment
     - Contains every binding inside the closure, except for the arguments
     - The arguments are not accessible outside of the object, making them private
     - Also contains `.my`, which refers to the instance itself
 - `feature()`
   - Defines a _feature_
-  - Takes any expression
+  - Takes an expression
   - Appends the expression to the object
     - Ad hoc: A _feature_ can be implemented on a _type_
     - Post hoc: Can also be implemented on an _instance_ 
@@ -160,30 +142,8 @@ motto
     - any expression (including _features_, but more importantly, any arbitrary expression)
   - Appends the expresseion to the object
 
-`Q7` users may leave behind the grand narrative of classical OOP orthodoxy, and exploit the benefits of objects simply as a unit of code, and as an instrument for namespace resolution.
+`Q7` users can leave behind the grand narrative of the classical OOP orthodoxy, and exploit the benefits of objects simply as a unit of code, and as an instrument for namespace resolution.
   
-### Versus R6
-
-Q7: Compositonal: I put a collar on my dog.
-R6: Hereditary: I made my dog a special kind of dog that has a collar.
-
-Q7: Can add or change features on-the-fly
-R6: Must unlock object first; `No apparent equivalent
-
-Q7: Implicit private elements, through constructor arguments
-R6: Explicit private elements
-
-Q7: Succinct & sweet: one constructor function defines the whole object
-R6: Verbose & bitter: `public`, `private`, `active`, `$new()`, `$clone()`
-
-Q7: Developed by one amateur
-R6: Developed by a team of experts
-
-Q7: 
-
-
-## Some More Examples
-Walk through the following comment-free examples and see if you can figure out how `Q7` works.
 
 ```{r include=FALSE}
 require(Q7)
@@ -198,8 +158,8 @@ TypeOne <- type(function(arg1, arg2){
 ```
 `type()` takes a function, which is used to construct an instance. 
 
-Everything defined within the function's closure becomes elements of the object.
-Arguments supplied to the function are accesible to the closure, but not become elements of the object themselves. 
+Everything defined within the function's closure becomes members of the object.
+Arguments supplied to the function are accesible to the closure, but not become members of the object themselves. 
 ```{r}
 type_one <- TypeOne(1, 2)
 type_one$...
@@ -235,7 +195,7 @@ hasFeatureTwo <- feature({
 
 ```
 
-### Private Elements
+#### Private members
 ```{r}
 
 Counter <- type(function(count = 0){
@@ -259,7 +219,8 @@ counter$add_one()
 counter$get_count()
 ```
 
-### Get Access to Private Environment
+##### Get Access to Private Environment
+The private environment is upstream to (parent of) the public environment. The following code allows direct outside access to the `count` object.
 ```{r}
 exposePrivateEnv <- feature({
   .pvt <- parent.env(.my)
@@ -270,62 +231,10 @@ counter$.pvt
 counter$.pvt$count
 ```
 
-#### R6 vs Q7
-```{r}
-R6Example <- R6::R6Class("R6Example", 
-                         public = list(
-                             var1 = 1, 
-                             var2 = 2, 
-                             f1 = function(){
-                                 self$var3 <- self$var1 + self$var2
-                             }, 
-                             c = NULL,
-                             f2 = function(){
-                                 private$var4 <- self$var1 + self$var2
-                             }, 
-                             f3 = function(){
-                                 private$var4
-                             }, 
-                             initialize = function(){
-                                 cat("initializing...")
-                             }
-                         ), 
-                         private = list(
-                             var4 = NULL
-                         )
-)
 
-r6 <- R6Example$new()
+#### Why is there no parameterized features?
 
-
-require(Q7)
-Q7Example <- type(function(var4){
-    cat("initializing...")
-    var1 <- 1
-    var2 <- 2
-    var3 <- NULL
-    fn1 <- function(){
-        var3 <<-  var1 + var2
-    }
-    fn2 <- function(){
-        var4 <<- var1 + var2
-    }
-    fn3 <- function(){
-        var4
-    }
-})
-
-
-q7 <- Q7Example()
-q7$fn1()
-q7$fn2()
-q7$fn3()
-ls(q7)
-```
-
-Why is there no parameterized features?
-
-_feature_ is subordinate to and dependent on _type_. It is encouraged to put all data elements in a _type_ definition, while _feature_ mainly contain just functions. If you feel significant need to parameterize a feature, think whether it's better to create a nested object or to formally extend a type. You can always re-define something in a feature post hoc. 
+_feature_ is subordinate to and dependent on _type_. It is encouraged to put all data members in a _type_ definition, while _feature_ mainly contain functions. If you feel significant need to parameterize a feature, think if it's better to create a nested object or to formally extend a type. You can always re-define something in a feature post hoc. 
 
 ```{r}
 Word <- type(function(word){})
@@ -348,5 +257,18 @@ pear <- Word("pear") %>%
     N_TIMES <- 5
   })
 pear$repeat_word()
+```
+
+```{r}
+repeatWordNTimes <- function(word, times){
+  localize(Word)(word) %>% 
+    hasRepeat() %>% 
+    implement({
+      N_TIMES <- times
+    })
+}
+
+orange <- repeatWordNTimes("orange", 7)
+orange$repeat_word()
 ```
 

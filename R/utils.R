@@ -5,8 +5,6 @@
 #'
 #' @return function
 #' @export
-#'
-#' @examples
 localize <- function(fn, envir = parent.frame()){
   stopifnot(is.function(fn))
   environment(fn) <- envir
@@ -15,27 +13,36 @@ localize <- function(fn, envir = parent.frame()){
 
 #' Clone
 #'
-#' @param ...
+#' @param ... dot-dot-dot
 #'
-#' @return
 #' @export
 #'
-#' @examples
 clone <- function(...){
   UseMethod("clone")
 }
 
-
 #' Clone an Instance
 #'
-#' @param inst
-#' @param deep
+#' @param inst Q7 object instance
+#' @param deep to copy nested object instances recursively; Boolean
+#' @param ... dot-dot-dot
 #'
-#' @return
+#' @return Q7 object instance
 #' @export
 #'
 #' @examples
-clone.Q7instance <- function(inst, deep = TRUE){
+#'
+#' Type1 <- type(function(num){
+#'   print_num <- function(){
+#'     print(num)
+#'   }
+#' })
+#' myType1 <- Type1(1)
+#' myType1$print_num()
+#' myType1_clone <- clone(myType1)
+#' myType1_clone$print_num()
+#'
+clone.Q7instance <- function(inst, deep = TRUE, ...){
   inst_clone <- new.env(parent = parent.env(inst))
   inst_clone$.my <- inst_clone
   names <- setdiff(ls(inst,all.names = TRUE), ".my")
@@ -55,16 +62,28 @@ clone.Q7instance <- function(inst, deep = TRUE){
   inst_clone
 }
 
-#' Build an Q7instance from a list
+#' Build a Q7 Object Instance from a List
 #'
-#' @param x
-#' @param parent
-#' @param ...
+#' @param x list
+#' @param s3 S3 class name of the instance
+#' @param parent parent environment of the instance
+#' @param ... dot-dot-dot
 #'
-#' @return
+#' @return Q7 object instance
 #' @export
 #'
 #' @examples
+#' my_data <- list(a = 1,
+#'                 add_to_a = function(value){
+#'                   .my$a <- a + value
+#'                 })
+#'
+#' myDataObject <- list2inst(my_data)
+#'
+#' myDataObject$a
+#' myDataObject$add_to_a(20)
+#' myDataObject$a
+#'
 list2inst <- function(x, s3 = "default", parent = parent.frame(), ...){
   instance <- list2env(x, parent = parent, ...)
   instance$.my <- instance
@@ -82,47 +101,4 @@ list2inst <- function(x, s3 = "default", parent = parent.frame(), ...){
 
   structure(instance,
             class = s3)
-}
-
-#' @rdname type
-#' @export
-print.Q7type <- function(x, ...) {
-  cat(paste0("<Q7type>", "\n"))
-  print(environment(x))
-  print.function(unclass(x))
-}
-
-#' @rdname type
-#' @export
-print.Q7instance <- function(x, ...){
-  cat(paste("<Q7instance>", "\n"))
-  s3 <- attr(x, "s3")
-  cat(`if`(!is.null(s3) && nchar(s3) > 0,
-           paste(s3, "\n")))
-
-  element_name_list <- ls(x, all.names = TRUE)
-  element_class_list <- lapply(element_name_list, function(y) class(get(y, envir = x)))
-  print_line <- function(name, class){
-    cat(paste0("- ", name, ": <", paste(class, collapse = ", "), ">\n"))
-  }
-  mapply(print_line, name = element_name_list, class = element_class_list)
-  invisible(x)
-}
-
-#' @rdname type
-#' @export
-is_type <- function(x){
-  inherits(x, "Q7type")
-}
-
-#' @rdname type
-#' @export
-is_instance <- function(x){
-  inherits(x, "Q7instance")
-}
-
-#' @rdname feature
-#' @export
-is_feature <- function(x){
-  inherits(x, "Q7feature")
 }

@@ -4,11 +4,31 @@
 \alias{clone.Q7instance}
 \title{Clone an Instance}
 \usage{
-\method{clone}{Q7instance}(inst, deep = TRUE)
+\method{clone}{Q7instance}(inst, deep = TRUE, ...)
 }
 \arguments{
-\item{deep}{}
+\item{inst}{Q7 object instance}
+
+\item{deep}{to copy nested object instances recursively; Boolean}
+
+\item{...}{dot-dot-dot}
+}
+\value{
+Q7 object instance
 }
 \description{
 Clone an Instance
+}
+\examples{
+
+Type1 <- type(function(num){
+  print_num <- function(){
+    print(num)
+  }
+})
+myType1 <- Type1(1)
+myType1$print_num()
+myType1_clone <- clone(myType1)
+myType1_clone$print_num()
+
 }
