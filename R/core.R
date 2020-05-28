@@ -1,3 +1,5 @@
+clean_up_keywords <- "suppressWarnings(tryCatch(rm(public, private, active, const, .my), error = function(e){}))"
+
 #' Create a Q7 Type
 #'
 #' @param x function or expression; becomes the definition of the object
@@ -27,13 +29,59 @@ type <- function(x = function(){}, s3 = "default"){
             body(fn) <- substitute(x)
         }
 
+        keywords <- deparse(quote({
+            private <- structure(NA, class = "private")
+            `[<-.private` <- function(., name, value){
+                name <- deparse(substitute(name))
+                assign(name, value, envir = .private)
+                .
+            }
+            lockBinding("private", .private)
+
+            public <- structure(NA, class = "public")
+            `[<-.public` <- function(., name, value){
+                name <- deparse(substitute(name))
+                assign(name, value, envir = .my)
+                .
+            }
+            lockBinding("public", .private)
+
+            active <- structure(NA, class = "active")
+            `[<-.active` <- function(., name, value){
+                name <- deparse(substitute(name))
+                makeActiveBinding(name, value, .my)
+                .
+            }
+            lockBinding("active", .private)
+
+            const <- structure(NA, class = "const")
+            `[<-.const` <- function(., name, value){
+                name <- deparse(substitute(name))
+                makeActiveBinding(name,
+                                  function(x){
+                                      if (missing(x)) {
+                                          return(value)
+                                      } else {
+                                          warning("Cannot change value of a constant.")
+                                          return(NULL)
+                                      }
+                                  },
+                                  .my)
+                .
+            }
+            lockBinding("const", .private)
+        }))
+
         fn_body <- deparse(body(fn))
         body(fn) <-
             parse(text = c("{",
                            "(function(){",
-                           ".my <- environment()",
+                           "assign('.my', environment(), envir = parent.env(environment()))",
+                           "assign('.private', parent.env(.my), envir = parent.env(.my))",
+                           "eval(quote(", keywords, "), envir = .private)",
                            strip_ends(fn_body),
                            paste0("class(.my) <- c('", s3, "', 'Q7instance')"),
+                           clean_up_keywords,
                            "return(.my)",
                            "})()",
                            "}"),
@@ -158,13 +206,16 @@ feature_generic <- function(s3, ...){
 #' myType2$change_number()
 #'
 feature <- function(expr){
-    expr <- substitute(expr)
-    feature_fn <- function(obj = parent.frame()$.my){
+    expr <- deparse(substitute(expr))
+    expr <- inject_text(expr,
+                        clean_up_keywords,
+                        length(expr) - 1)
+    feature_fn <- function(obj = parent.frame()){
         obj_classes <- class(obj)
         if (is_instance(obj)) {
-            eval(expr, envir = obj)
+            eval(parse(text = expr), envir = obj)
         } else if (is_type(obj)) {
-            expr <- strip_ends(deparse(expr))
+            expr <- strip_ends(expr)
             obj_fn_body <- strip_ends(deparse(body(obj)))
             obj_fn_body <- inject_text(text_1 = obj_fn_body,
                                    text_2 = expr,
@@ -197,19 +248,19 @@ feature <- function(expr){
 #'
 #' myType1$change_number()
 implement <- function(obj, feat) {
-    feat <- substitute(feat)
+    feat <- deparse(substitute(feat))
+    feat <- inject_text(feat,
+                        clean_up_keywords,
+                        length(feat) - 1)
     obj_classes <- class(obj)
+
     if (is_instance(obj)) {
-        if (is_feature(feat)) {
-            feat(obj)
-        } else if (is.language(feat)) {
-            eval(feat, obj)
-        }
+        eval(parse(text = feat), obj)
     } else if (is_type(obj)) {
-        feat <- strip_ends(deparse(feat))
-        fn_body <- strip_ends(deparse(body(obj)))
-        fn_body <- inject_text(fn_body, feat, length(fn_body) - 3)
-        body(obj) <- parse(text = c("{", fn_body, "}"))
+        feat <- strip_ends(feat)
+        obj_fn_body <- strip_ends(deparse(body(obj)))
+        obj_fn_body <- inject_text(obj_fn_body, feat, length(obj_fn_body) - 2)
+        body(obj) <- parse(text = c("{", obj_fn_body, "}"))
     }
     invisible(structure(obj, class = obj_classes))
 }
