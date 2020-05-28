@@ -45,6 +45,9 @@ knitr::opts_chunk$set(
   - Feel free to shoot your feet, if so desired
   - Want safety? Lock'em yerself
 
+
+`Q7` users can leave behind the grand narrative of the OOP orthodoxy, and exploit the benefits of objects simply as a unit of code, and as an instrument for namespace resolution.
+
 ## Installation
 
 ``` r
@@ -139,10 +142,9 @@ motto
 - `implement()`
   - Takes
     - object, a _type_ or _instance_
-    - any expression (including _features_, but more importantly, any arbitrary expression)
+    - any expression (including _features_, but more importantly, an arbitrary expression)
   - Appends the expresseion to the object
 
-`Q7` users can leave behind the grand narrative of the classical OOP orthodoxy, and exploit the benefits of objects simply as a unit of code, and as an instrument for namespace resolution.
   
 
 ```{r include=FALSE}
@@ -223,18 +225,20 @@ counter$get_count()
 The private environment is upstream to (parent of) the public environment. The following code allows direct outside access to the `count` object.
 ```{r}
 exposePrivateEnv <- feature({
-  .pvt <- parent.env(.my)
+  .private <- parent.env(.my)
 })
 
 counter %>% exposePrivateEnv()
-counter$.pvt
-counter$.pvt$count
+counter$.private
+counter$.private$count
 ```
 
 
-#### Why is there no parameterized features?
+#### Parameterized features?
 
 _feature_ is subordinate to and dependent on _type_. It is encouraged to put all data members in a _type_ definition, while _feature_ mainly contain functions. If you feel significant need to parameterize a feature, think if it's better to create a nested object or to formally extend a type. You can always re-define something in a feature post hoc. 
+
+This will be implemented in the future.
 
 ```{r}
 Word <- type(function(word){})

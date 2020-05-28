@@ -42,6 +42,10 @@ powerful and *postmodern* paradigm, featuring:
   - Feel free to shoot your feet, if so desired
   - Want safety? Lock’em yerself
 
+`Q7` users can leave behind the grand narrative of the OOP orthodoxy,
+and exploit the benefits of objects simply as a unit of code, and as an
+instrument for namespace resolution.
+
 ## Installation
 
 ``` r
@@ -158,12 +162,8 @@ motto
       - Takes
           - object, a *type* or *instance*
           - any expression (including *features*, but more importantly,
-            any arbitrary expression)
+            an arbitrary expression)
       - Appends the expresseion to the object
-
-`Q7` users can leave behind the grand narrative of the classical OOP
-orthodoxy, and exploit the benefits of objects simply as a unit of code,
-and as an instrument for namespace resolution.
 
 Make a type:
 
@@ -251,23 +251,25 @@ environment. The following code allows direct outside access to the
 
 ``` r
 exposePrivateEnv <- feature({
-  .pvt <- parent.env(.my)
+  .private <- parent.env(.my)
 })
 
 counter %>% exposePrivateEnv()
-counter$.pvt
-#> <environment: 0x000000001c896d40>
-counter$.pvt$count
+counter$.private
+#> <environment: 0x000000001c8a1a28>
+counter$.private$count
 #> [1] 2
 ```
 
-#### Why is there no parameterized features?
+#### Parameterized features?
 
 *feature* is subordinate to and dependent on *type*. It is encouraged to
 put all data members in a *type* definition, while *feature* mainly
 contain functions. If you feel significant need to parameterize a
 feature, think if it’s better to create a nested object or to formally
 extend a type. You can always re-define something in a feature post hoc.
+
+This will be implemented in the future.
 
 ``` r
 Word <- type(function(word){})
