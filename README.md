@@ -14,10 +14,10 @@ flexible and powerful paradigm. Q7 features:
 
   - Compositional manner of construction with `type()`, `feature()` and
     `implement()`
-
+  - Define `initialize()` and `finalize()` to run at the beginning and
+    the end
   - Has `public`, `private`, `final` and `active` binding modifiers
 
-  - 
 `Q7` users can leave behind the grand narrative of the OOP orthodoxy,
 and enjoy
 

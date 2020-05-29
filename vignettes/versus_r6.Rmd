@@ -374,3 +374,35 @@ rm(obj); gc()
 ```
 
 Q7 will not wrap your finalizer function, so you must provide include an argument (could be any name) to represent the object itself.
+
+
+```{r}
+FunctionWrapper <- type({
+  fn <- NULL
+  get_my <- function(){
+    .my
+  }
+})
+
+a <- FunctionWrapper()
+
+.my <- 100
+a$fn <- function(){
+  .my
+}
+
+a$get_my()
+
+a$fn()
+
+```
+
+```{r}
+b <- clone(a)
+
+
+b$get_my()
+b$fn()
+
+```
+

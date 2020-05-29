@@ -20,12 +20,18 @@ migrate_elements <- function(from, to){
 }
 
 migrate_fns <- function(from, to) {
-    sapply(Filter(function(.) is.function(get(., envir = from)),
-                  ls(envir = from)),
-           function(.) {
-               f <- get(., envir = from)
-               environment(f) <- to
-               assign(., f, envir = to)
-           })
-    invisible(to)
+  sapply(
+    Filter(function(.){
+      f <- get(., envir = from)
+      is.function(f) &&
+        identical(environment(f),
+                  from)
+    },
+    ls(envir = from)),
+    function(.) {
+      f <- get(., envir = from)
+      environment(f) <- to
+      assign(., f, envir = to)
+    })
+  invisible(to)
 }

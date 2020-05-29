@@ -59,7 +59,9 @@ clone.Q7instance <- function(inst, deep = TRUE, ...){
                        ".private"))
     for (name in names) {
       value <- from[[name]]
-      if (is.function(value)) {
+      if (is.function(value) &&
+          identical(environment(value),
+                    from$.my)) {
         environment(value) <- to
       }
       to[[name]] <- `if`(is_instance(value),
