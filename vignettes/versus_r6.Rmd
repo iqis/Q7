@@ -356,8 +356,21 @@ c2$s$x
 ```
 The default `clone()` behavior in Q7 is deep. So any nested instances also gets cloned. Like in R6, only instances will be cloned. The example of a custom `deep_clone` method in the R6 document is skipped for brevity. 
 
-#### [_Printing Q7 objects to the screen_]
+#### _Printing Q7 objects to the screen_
 ```{r}
 
 ```
 
+#### _Finalizers_
+```{r}
+A <- type(function(){
+  private[finalize] <- function(.my){
+        print("Finalizer has been called!")
+  }
+})
+
+obj <- A()
+rm(obj); gc()
+```
+
+Q7 will not wrap your finalizer function, so you must provide include an argument (could be any name) to represent the object itself.

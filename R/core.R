@@ -23,7 +23,7 @@ type <- function(x = function(){}, s3 = "default"){
         x_char <- deparse(substitute(x))
 
         if (grepl("function\\(", x_char[1])) { # if x is a function
-            fn <- x # then use x
+            fn <- x # then use x itself
         } else {
             fn <- function(){} # or make a new one
             body(fn) <- substitute(x)
@@ -99,8 +99,10 @@ type <- function(x = function(){}, s3 = "default"){
                            "assign('.private', parent.env(.my), envir = parent.env(.my))",
                            "eval(quote(", keywords, "), envir = .private)",
                            "private[initialize] <- function(){}",
+                           "private[finalize] <- function(.my){}",
                            strip_ends(fn_body),
                            "initialize()",
+                           "reg.finalizer(.my, finalize, TRUE)",
                            paste0("class(.my) <- c('", s3, "', 'Q7instance')"),
                            paste0("attr(.my, \"s3\") <- \"", s3, "\""),
                            clean_up_keywords,
@@ -242,7 +244,7 @@ feature <- function(expr){
             obj_fn_body <- strip_ends(deparse(body(obj)))
             obj_fn_body <- inject_text(text_1 = obj_fn_body,
                                    text_2 = expr,
-                                   index = length(obj_fn_body) - 8) # number 8 see implement()
+                                   index = length(obj_fn_body) - 9) # number 8 see implement()
             body(obj) <- parse(text = c("{", obj_fn_body, "}"))
         }
         invisible(structure(obj, class = obj_classes))
@@ -282,7 +284,7 @@ implement <- function(obj, feat) {
     } else if (is_type(obj)) {
         feat <- strip_ends(feat)
         obj_fn_body <- strip_ends(deparse(body(obj)))
-        obj_fn_body <- inject_text(obj_fn_body, feat, length(obj_fn_body) - 8)
+        obj_fn_body <- inject_text(obj_fn_body, feat, length(obj_fn_body) - 9)
         # 8 is the number of lines of in the end of the function that must be executed at last
         # see type()
         body(obj) <- parse(text = c("{", obj_fn_body, "}"))

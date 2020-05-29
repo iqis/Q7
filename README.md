@@ -9,8 +9,8 @@
 
 <!-- badges: end -->
 
-`Q7` enables a postmodern flavor of object-oriented programming (OOP)-a
-fluid and powerful paradigm-featuring:
+Q7 enables a postmodern flavor of object-oriented programming (OOP), a
+flexible and powerful paradigm. Q7 features:
 
   - Compositional manner of construction with `type()`, `feature()` and
     `implement()`
