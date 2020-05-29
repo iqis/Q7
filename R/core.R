@@ -1,4 +1,4 @@
-clean_up_keywords <- "suppressWarnings(tryCatch(rm(public, private, active, const, .my), error = function(e){}))"
+clean_up_keywords <- "suppressWarnings(tryCatch(rm(public, private, active, final, private_final, .my), error = function(e){}))"
 
 #' Create a Q7 Type
 #'
@@ -36,7 +36,7 @@ type <- function(x = function(){}, s3 = "default"){
                 assign(name, value, envir = .private)
                 .
             }
-            lockBinding("private", .private)
+            # lockBinding("private", .private)
 
             public <- structure(NA, class = "public")
             `[<-.public` <- function(., name, value){
@@ -44,7 +44,7 @@ type <- function(x = function(){}, s3 = "default"){
                 assign(name, value, envir = .my)
                 .
             }
-            lockBinding("public", .private)
+            # lockBinding("public", .private)
 
             active <- structure(NA, class = "active")
             `[<-.active` <- function(., name, value){
@@ -52,24 +52,43 @@ type <- function(x = function(){}, s3 = "default"){
                 makeActiveBinding(name, value, .my)
                 .
             }
-            lockBinding("active", .private)
+            # lockBinding("active", .private)
 
-            const <- structure(NA, class = "const")
-            `[<-.const` <- function(., name, value){
+            final <- structure(NA, class = "final")
+            `[<-.final` <- function(., name, value){
                 name <- deparse(substitute(name))
-                makeActiveBinding(name,
-                                  function(x){
-                                      if (missing(x)) {
-                                          return(value)
-                                      } else {
-                                          warning("Cannot change value of a constant.")
-                                          return(NULL)
-                                      }
-                                  },
-                                  .my)
+                makeActiveBinding(
+                    name,
+                    function(x){
+                        if (missing(x)) {
+                            return(value)
+                        } else {
+                            stop("Cannot change value of a final binding.")
+                            return(NULL)
+                        }
+                    },
+                    .my)
                 .
             }
-            lockBinding("const", .private)
+            # lockBinding("final", .private)
+
+            private_final <- structure(NA, class = "private_final")
+            `[<-.private_final` <- function(., name, value){
+                name <- deparse(substitute(name))
+                makeActiveBinding(
+                    name,
+                    function(x){
+                        if (missing(x)) {
+                            return(value)
+                        } else {
+                            stop("Cannot change value of a final binding.")
+                            return(NULL)
+                        }
+                    },
+                    .private)
+                .
+            }
+            # lockBinding("private_final", .private)
         }))
 
         fn_body <- deparse(body(fn))
@@ -79,8 +98,11 @@ type <- function(x = function(){}, s3 = "default"){
                            "assign('.my', environment(), envir = parent.env(environment()))",
                            "assign('.private', parent.env(.my), envir = parent.env(.my))",
                            "eval(quote(", keywords, "), envir = .private)",
+                           "private[initialize] <- function(){}",
                            strip_ends(fn_body),
+                           "initialize()",
                            paste0("class(.my) <- c('", s3, "', 'Q7instance')"),
+                           paste0("attr(.my, \"s3\") <- \"", s3, "\""),
                            clean_up_keywords,
                            "return(.my)",
                            "})()",
@@ -106,7 +128,7 @@ type <- function(x = function(){}, s3 = "default"){
 #' Type1 <- type(function(arg1){
 #'     val1 <- arg1
 #'     get_val1 <- function(){
-#'         val1
+#'          val1
 #'     }
 #' }, "Type1")
 #'
@@ -127,12 +149,13 @@ extend <- function(prototype){
     function(...){
         type_envir <- parent.frame()
         prototype_envir <- localize(prototype, envir = type_envir)(...)
-        # if (length(ls(prototype_envir)) > 0) {
-        migrate_elements(prototype_envir, type_envir)
+        if (length(ls(prototype_envir, all.names = TRUE)) > 0) {
+            migrate_elements(prototype_envir, type_envir)
+            migrate_fns(prototype_envir, type_envir)
+        }
         migrate_elements(parent.env(prototype_envir), parent.env(type_envir))
-        migrate_fns(prototype_envir, type_envir)
         migrate_fns(parent.env(prototype_envir), parent.env(type_envir))
-        # }
+        NULL
     }
 }
 
@@ -219,7 +242,7 @@ feature <- function(expr){
             obj_fn_body <- strip_ends(deparse(body(obj)))
             obj_fn_body <- inject_text(text_1 = obj_fn_body,
                                    text_2 = expr,
-                                   index = length(obj_fn_body) - 2)
+                                   index = length(obj_fn_body) - 8) # number 8 see implement()
             body(obj) <- parse(text = c("{", obj_fn_body, "}"))
         }
         invisible(structure(obj, class = obj_classes))
@@ -259,7 +282,9 @@ implement <- function(obj, feat) {
     } else if (is_type(obj)) {
         feat <- strip_ends(feat)
         obj_fn_body <- strip_ends(deparse(body(obj)))
-        obj_fn_body <- inject_text(obj_fn_body, feat, length(obj_fn_body) - 2)
+        obj_fn_body <- inject_text(obj_fn_body, feat, length(obj_fn_body) - 8)
+        # 8 is the number of lines of in the end of the function that must be executed at last
+        # see type()
         body(obj) <- parse(text = c("{", obj_fn_body, "}"))
     }
     invisible(structure(obj, class = obj_classes))

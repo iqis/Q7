@@ -43,21 +43,38 @@ clone <- function(...){
 #' myType1_clone$print_num()
 #'
 clone.Q7instance <- function(inst, deep = TRUE, ...){
-  inst_clone <- new.env(parent = parent.env(inst))
-  inst_clone$.my <- inst_clone
-  names <- setdiff(ls(inst,all.names = TRUE), ".my")
-  for (name in names) {
-    value <- inst[[name]]
-    if (is.function(value)) {
-      environment(value) <- inst_clone
+  inst_private <- parent.env(inst)
+
+  inst_clone_private <- new.env(parent = parent.env(inst_private))
+
+  inst_clone <- new.env(parent = inst_clone_private)
+
+  inst_clone_private$.my <- inst_clone
+  inst_clone_private$.private <- inst_clone_private
+
+  do_clone <- function(from, to){
+    names <- setdiff(ls(from,
+                        all.names = TRUE),
+                     c(".my",
+                       ".private"))
+    for (name in names) {
+      value <- from[[name]]
+      if (is.function(value)) {
+        environment(value) <- to
+      }
+      to[[name]] <- `if`(is_instance(value),
+                         `if`(deep,
+                              clone.Q7instance(inst = value,
+                                               deep = deep),
+                              value),
+                         value)
     }
-    inst_clone[[name]] <- `if`(is_instance(value),
-                              `if`(deep,
-                                  Recall(inst = value,
-                                         deep = deep),
-                                  value),
-                              value)
   }
+
+  do_clone(inst_private, inst_clone_private)
+  do_clone(inst, inst_clone)
+
+  # TODO: check for locked bindings, replicate lockedness
   attributes(inst_clone) <- attributes(inst)
   inst_clone
 }

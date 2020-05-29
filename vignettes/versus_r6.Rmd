@@ -1,5 +1,5 @@
 ---
-title: "Versus R6"
+title: "Comparison to R6"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{versus_r6}
@@ -24,19 +24,10 @@ Q7: Compositonal: I put a plasma gun on my spaceship.
 R6: Hereditary: I made my spaceship a special kind of spaceship that has a plasma gun.
 
 Q7: Can add or change features on-the-fly
-R6: Must unlock object first; No apparent equivalent mechanism
+R6: No apparent equivalent mechanism
 
 Q7: Free
 R6: Safe
-
-Q7: Succinct & sweet: one function defines & initializes the whole object
-R6: Verbose & bitter: `public`, `private`, `active`, `$new()`, `$clone()`...
-
-Q7: Implicitly defined private members
-R6: Explicitly defined private members
-
-Q7: Developed by one amateur
-R6: Developed by a team of experts
 
 
 ```{r}
@@ -96,3 +87,277 @@ q7$fn2()
 q7$fn3()
 ls(q7)
 ```
+
+
+The following are the equivalents of R6 examples in its introduction document. Click on the subtitles to jump to corresponding sections. 
+
+```{r}
+library(Q7)
+```
+
+#### [_Basics_](https://r6.r-lib.org/articles/Introduction.html#basics)
+```{r}
+Person <- type(function(name, hair){
+  name <- name
+  hair <- hair
+  set_hair <- function(val){
+    hair <<- val
+  }
+  greet <- function(){
+    cat(paste0("Hello, my name is ", name, ".\n"))
+  }
+}, "Person")
+Person
+```
+
+_to instantiate an object of this type..._
+
+```{r}
+ann <- Person("Ann", "black")
+ann
+```
+
+```{r}
+ann$hair
+ann$greet()
+ann$set_hair("red")
+ann$hair
+```
+
+#### [_Private members_](https://r6.r-lib.org/articles/Introduction.html#private-members)
+
+```{r}
+Queue <- type(function(...){
+  private[queue] <- list()
+  private[length] <- function(){
+    base::length(queue)
+  }
+  
+  add <- function(x){
+    queue <<- c(queue, list(x))
+    invisible(.my)
+  }
+  
+  remove <- function() {
+    if (length() == 0) return(NULL)
+    head <- queue[[1]]
+    queue <<- queue[-1]
+    head
+  }
+  
+  private[dots] <- list(...) 
+  # this is necessary because ... (dot-dot-dot) must be captured here, and that 
+  # the initialize() function must not take any arguments.
+  private[initialize] <- function(){
+    for (item in dots) {
+      add(item)
+    }
+  }
+})
+
+q <- Queue(5, 6, "foo")
+```
+
+```{r}
+q$add("something")
+q$add("another thing")
+q$add(17)
+q$remove()
+q$remove()
+```
+
+```{r}
+q$queue
+q$length()
+```
+
+```{r}
+q$add(10)$add(11)$add(12)
+```
+
+```{r}
+q$remove()
+q$remove()
+q$remove()
+q$remove()
+```
+
+#### [_Active Bindings_](https://r6.r-lib.org/articles/Introduction.html#active-bindings)
+
+```{r}
+Numbers <- type(function(){
+  x <- 100
+  active[x2] <- function(value) {
+      if (missing(value)) return(x * 2)
+      else x <<- value/2
+  }
+  active[rand] <- function(){
+    rnorm(1)
+  }
+}, "Numbers")
+
+n <- Numbers()
+n$x
+```
+
+```{r}
+n$x2
+```
+
+```{r}
+n$x2 <- 1000
+n$x
+```
+
+```{r}
+n$rand
+n$rand
+n$rand <- 3
+```
+
+```{r}
+HistoryQueue <- Queue %>% 
+  implement({
+    head_idx <- 0
+    
+    show <- function() {
+      cat("Next item is at index", head_idx + 1, "\n")
+      for (i in seq_along(queue)) {
+        cat(i, ": ", queue[[i]], "\n", sep = "")
+      }
+    }
+    
+    remove <- function() {
+      if (length() - head_idx == 0) return(NULL)
+      head_idx <<- head_idx + 1
+      queue[[head_idx]]
+    }
+  })
+```
+
+```{r}
+hq <- HistoryQueue(5, 6, "foo")
+hq$show()
+hq$remove()
+hq$show()
+hq$remove()
+```
+
+NOTE: there is no inheritance in Q7. But you can rename anything you don't meant to override. 
+
+```{r}
+CountingQueue <- Queue %>% implement({
+  private[total] <- 0
+  private[proto.add] <- add 
+  
+  add <- function(x) {
+      total <<- total + 1
+      proto.add(x)
+  }
+      
+  get_total <-  function() total
+})
+
+
+cq <- CountingQueue("x", "y")
+cq$get_total()
+cq$add("z")
+cq$remove()
+cq$remove()
+cq$get_total()
+```
+
+# [_Fields containing reference objects_](https://r6.r-lib.org/articles/Introduction.html#fields-containing-reference-objects)
+
+```{r}
+SimpleClass <- type(function(){
+  x <- NULL
+}, "SimpleClass")
+
+SharedField <- type(function(){
+  e <- SimpleClass()
+}, "SharedField")
+
+s1 <- SharedField()
+s1$e$x <- 1
+
+s2 <- SharedField()
+s2$e$x <- 2
+
+s1$e$x
+```
+
+Q7 and R6 shows differnet behavior. In Q7's case, `s1`'s `x` isn't changed with that of `s2`. The `x` in the R6 example lives with the class; it lives with the instance by default in Q7. The R6 example goes on to show a solution with an separate initializer; the same this not necessary in Q7, as the type definition itself is its initializer. 
+
+#### [_Other topics_](https://r6.r-lib.org/articles/Introduction.html#other-topics)
+##### _Adding members to an existing class_
+```{r}
+Simple <- type(function(){
+  x <- 1
+  getx <- function(){
+    x
+  }
+}, "Simple")
+
+Simple <- Simple %>% implement({
+  getx2 <- function(){
+    x * 2
+  }
+})
+
+Simple <- Simple %>% implement({
+  x <- 10
+})
+
+
+s <- Simple()
+s$getx2()
+```
+
+Notice: In Q7, new code is simply appened to the old, meaning everything will be executed from the beginning to the end. This make it inefficient when you replace something costly to make, like reading in a large amount of data or performing a lengthy calculation. In this case, it's best to make a new type from scratch, or define a common prototype.
+
+Q7 types need not be locked. 
+
+#### _Cloning Objects_
+```{r}
+Simple <- type(function(){
+  x <- 1
+  getx <- function(){
+    x
+  }
+}, "Simple")
+
+s <- Simple()
+
+s1 <- clone(s)
+
+s1$x <- 2
+s1$getx()
+
+s$getx()
+```
+
+__Deep Cloning__
+```{r}
+Simple <- type(function(){
+  x <- 1
+}, "Simple")
+
+Cloneable <- type(function(){
+  s <- NULL
+  s <- Simple()
+}, "Cloneable")
+
+c1 <- Cloneable()
+c2 <- clone(c1)
+
+c1$s$x <- 2
+c2$s$x
+```
+The default `clone()` behavior in Q7 is deep. So any nested instances also gets cloned. Like in R6, only instances will be cloned. The example of a custom `deep_clone` method in the R6 document is skipped for brevity. 
+
+#### [_Printing Q7 objects to the screen_]
+```{r}
+
+```
+

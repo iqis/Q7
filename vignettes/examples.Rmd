@@ -34,7 +34,7 @@ Dog <- type(function(name, breed){
 
 ```{r}
 walter <- Dog("Walter", "Husky")
-ls(walter, all.names = TRUE)
+ls(walter)
 ```
 
 
@@ -112,69 +112,6 @@ walter$take_for_a_walk()
 ```
 
 
-### Dogs 2
-```{r}
-Dog <- type(function(name, breed){
-    self_intro <- function() {
-        paste("My name is", name, "and I'm a", breed)
-    }
-    fav_food <- NULL
-    fav_food2 <- NULL
-    set_fav_foods <- function(food, food2) {
-        .my$fav_food <- food
-        fav_food2 <<- food2
-    }
-    collar <-  type(function() {
-        color <- "red"
-        buckle <- type(function(material = "gold"){
-            material <- material
-        })()
-        brand <- "unknown"
-    })()
-})
-
-Dog
-
-my_dog <- Dog("Captain Cook", "Boston Terrier")
-my_dog$self_intro()
-my_dog$fav_food
-my_dog$set_fav_foods("Sausage", "Bacon")
-my_dog$fav_food
-my_dog$fav_food2
-
-new_dog <- clone(my_dog)
-new_dog
-my_dog
-
-new_dog$name <- "Snowy"
-new_dog$breed <- "Westie"
-new_dog$self_intro()
-my_dog$self_intro()
-
-my_dog$collar
-new_dog$collar$color <- "black"
-
-my_dog$collar$color
-new_dog$collar$color
-
-identical(my_dog$collar$buckle, new_dog$collar$buckle)
-
-my_dog %>% implement({
-    owner <- NULL
-    come_to_owner <- function(){
-        paste(name, "runs toward", owner, 
-              "in a collar that is", collar$color)
-    }
-})
-
-my_dog$owner <- "Jack"
-my_dog$come_to_owner()
-
-ur_dog <- Dog("Fifi", "Bulldog")
-ur_dog$collar$color
-```
-
-
 ### Workplace Overtime
 ```{r}
 Employee <- type(function(weekly_hours){}, "Employee")
@@ -184,7 +121,7 @@ john <- Employee(45)
 ```{r}
 Manager <- type(function(weekly_hours){
   extend(Employee)(weekly_hours)
-  is_manager <- TRUE
+  final[is_manager] <- TRUE
 }, "Manager")
 
 mike <- Manager(45)
@@ -199,7 +136,7 @@ hasOvertime.Employee <- feature({
 })
 
 hasOvertime.Manager <- feature({
-  .my$is_overtime <- function() FALSE
+  is_overtime <- function() FALSE
 })
 ```
 
@@ -216,25 +153,33 @@ mike$is_overtime()
 
 
 ```{r}
+hasOvertime.Boss <- feature({
+  final[is_overtime] <- function(){
+    FALSE
+  }
+})
+
 Boss <- 
-  type(function(weekly_hours){
-    weekly_hours <- weekly_hours
-  }) %>% 
-  hasOvertime.Manager()
-jill <- Boss(80)
+  type({
+    extend(Employee)(24 * 7)
+  }, 
+  "Boss") %>% 
+  hasOvertime()
+
+jill <- Boss()
 jill$is_overtime()
 ```
 
 
 ### Grade School Geometry
 ```{r}
-Circle <- 
-    type(function(radius){}, 
-         "Circle")
-    
-Square <- 
-    type(function(side){}, 
-         "Square")
+Circle <- type(
+  function(radius){}, 
+  "Circle")
+
+Square <- type(
+  function(side){}, 
+  "Square")
 
 hasArea <- feature_generic("hasArea")
 
@@ -251,23 +196,28 @@ hasArea.Circle <-
             radius^2 * pi
         }
     })
+```
 
+
+```{r}
 circle <- Circle(1) %>% hasArea()
 circle$area()
 
 square <- Square(1.5) %>% hasArea()
 square$area()
+```
 
 
+```{r}
 hasArea.EquilateralTriangle <- feature({
     area <- function(){
         (side^2 * sqrt(3)) / 4
     }
 })
 
-EquilateralTriangle <- 
-    type(function(side){}, 
-         "EquilateralTriangle") %>%
+EquilateralTriangle <- type(
+  function(side){}, 
+  "EquilateralTriangle") %>%
     hasArea()
 
 equilateral_triangle <- EquilateralTriangle(1)
@@ -283,15 +233,15 @@ isLocked <- feature({
     lockEnvironment(.my, bindings = TRUE)
 })
 
-Test <- type(function(){
+TestLocked <- type(function(){
     a <- 1
 }) %>% isLocked()
 
-test <- Test()
-try(test$a <- 666)
-try(test$b <- 666)
+test_locked <- TestLocked()
+try(test_locked$a <- 666)
+try(test_locked$b <- 666)
 try({
-  test %>% 
+  test_locked %>% 
     implement({
       a <- 666
     })
@@ -300,12 +250,16 @@ try({
 
 
 ### State Machine
+
+This simple state machine guards a secret message with a password. 
+
 ```{r}
-State <- type(function(){
+State <- type(
+  function(password, secret_message = ""){
     name <- "DEFAULT"
     cat("Processing Current State...\n")
     print_current_state <- function(){
-        cat(paste("Current State:", name, "\n"))
+      cat(paste("Current State:", name, "\n"))
     }
 })
 
@@ -314,43 +268,105 @@ LockedState <- State %>%
         name <- "Locked"
         print_current_state()
         on_event <- function(event) {
-            if (event == "8888") {
-                return(UnlockedState())
+            if (event == password) {
+              cat("Access Granted.\n")
+              return(UnlockedState(password, secret_message))
             } else {
-                cat("Wrong Password.\n")
-                return(.my)
+              cat("Wrong Password. Access Denied.\n")
+              return(.my)
             }
         }
     })
 
 UnlockedState <- State %>%
-    implement({
-        name <- "Unlocked"
-        print_current_state()
-        on_event <- function(event) {
-            if (event == "lock") {
-                return(LockedState())
-            } else {
-                cat("Invalid Operation. \n")
-                return(.my)
-            }
-        }
-    })
+  implement({
+    name <- "Unlocked"
+    print_current_state()
+    
+    private[print_secret_message] <- function(){
+      cat(secret_message)
+    }
+    
+    on_event <- function(event) {
+      if (event == password) {
+        return(LockedState(password, secret_message))
+      } else if (event == "show") {
+        print_secret_message()
+        return(.my)
+      } else{
+        cat("Invalid Instruction. \n")
+        return(.my)
+      }
+    }
+  })
 
-SimpleDevice <- type(function(){
-    state <- LockedState()
+SimpleDevice <- type(function(password, secret_message){
+    state <- LockedState(password, secret_message)
     on_event <- function(event){
-        .my$state <- state$on_event(event)
+        state <<- state$on_event(event)
     }
 })
 ```
 
 
 ```{r}
-device <- SimpleDevice()
+device <- SimpleDevice(password = "xxx", 
+                       secret_message = "I love you.")
+  
+device$on_event("1234")
+device$on_event("PvmpKinM4n777")
+
+device$on_event("xxx")
+
+device$on_event("fiddlin...")
+device$on_event("meddlin...")
+device$on_event("show")
+
+device$on_event("xxx")
 
 device$on_event("0000")
-device$on_event("8888")
-device$on_event("do something")
-device$on_event("lock")
 ```
+
+
+#### Parameterized features?
+
+_feature_ is subordinate to and dependent on _type_. It is encouraged to put all data members in a _type_ definition, while _feature_ mainly contain functions. If you feel significant need to parameterize a feature, think if it's better to create a nested object or to formally extend a type. You can always re-define something in a feature post hoc. 
+
+This will be implemented in the future.
+
+```{r}
+Word <- type(function(word){})
+hasRepeat <- feature({
+  N_TIMES <- 2
+  repeat_word <- function(){
+    cat(rep(word, N_TIMES))
+  }
+})
+```
+
+```{r}
+apple <- Word("apple") %>% hasRepeat()
+apple$repeat_word()
+```
+```{r}
+pear <- Word("pear") %>% 
+  implement({
+    hasRepeat()
+    N_TIMES <- 5
+  })
+pear$repeat_word()
+```
+
+```{r}
+repeatWordNTimes <- function(word, times){
+  localize(Word)(word) %>% 
+    hasRepeat() %>% 
+    implement({
+      N_TIMES <- times
+    })
+}
+
+orange <- repeatWordNTimes("orange", 7)
+orange$repeat_word()
+```
+
