@@ -20,7 +20,7 @@ Used only inside a type definition
 Type1 <- type(function(arg1){
     val1 <- arg1
     get_val1 <- function(){
-        val1
+         val1
     }
 }, "Type1")
 

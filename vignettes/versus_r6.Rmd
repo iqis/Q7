@@ -10,86 +10,41 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  error = TRUE
 )
 ```
 
-```{r setup}
-library(Q7)
-```
-
-### 
-
-Q7: Compositonal: I put a plasma gun on my spaceship.
-R6: Hereditary: I made my spaceship a special kind of spaceship that has a plasma gun.
-
-Q7: Can add or change features on-the-fly
-R6: No apparent equivalent mechanism
-
-Q7: Free
-R6: Safe
+Q7 is expected to be compared with R6. The main difference 
+On a technical level, Q7 is expected to have performance deficiencies when compared to R6. 
 
 
-```{r}
-R6Example <- R6::R6Class("R6Example", 
-                         public = list(
-                           var1 = 1, 
-                           var2 = NULL,
-                           var3 = NULL,
-                           f1 = function(){
-                             self$var3 <- self$var1 + self$var2
-                           }, 
-                           f2 = function(){
-                             private$var4 <- self$var1 + self$var2
-                           }, 
-                           f3 = function(){
-                             private$var4
-                           }, 
-                           initialize = function(var2){
-                             cat("initializing...")
-                             self$var2 <- var2
-                           }
-                         ), 
-                         private = list(
-                           var4 = NULL
-                         )
-)
-
-r6 <- R6Example$new(2)
-r6$f1()
-r6$var2
-r6$var3
-```
+#### Terminologies
 
 
-```{r}
-require(Q7)
-Q7Example <- type(function(var2, var4){
-  cat("initializing...")
-  var1 <- 1
-  .my$var2 <- 2
-  var3 <- NULL
-  fn1 <- function(){
-    var3 <<-  var1 + var2
-  }
-  fn2 <- function(){
-    var4 <<- var1 + var2
-  }
-  fn3 <- function(){
-    var4
-  }
-})
+The blueprint for an _object_:
+ - R6: a class
+ - Q7: a type
+ 
+The object which creates instances from the blueprint
+ - R6: a generator
+  - within, a `$new()` method
+ - Q7: a constructor function
+ 
+Functions defined inside an object
+ - R6: a method
+ - Q7: 
+   - a bound function (as opposed to a free function) 
+   - a domestic function (as opposed to a foreign function)
 
 
-q7 <- Q7Example(2)
-q7$fn1()
-q7$fn2()
-q7$fn3()
-ls(q7)
-```
+- Compositonal: I put a plasma cannon on my spaceship, then expanded the cargo area.
+- Hereditary: I made my spaceship a special kind of spaceship that has a plasma cannon, then further made it special with an expanded cargo area.
 
 
-The following are the equivalents of R6 examples in its introduction document. Click on the subtitles to jump to corresponding sections. 
+The following is the equivalent to examples from R6's [Introduction](https://r6.r-lib.org/articles/Introduction.html), leaving out original comments & explainations. 
+
+You can compare the the implementation of R6 and Q7 side-by-side. 
 
 ```{r}
 library(Q7)
@@ -110,7 +65,6 @@ Person <- type(function(name, hair){
 Person
 ```
 
-_to instantiate an object of this type..._
 
 ```{r}
 ann <- Person("Ann", "black")
@@ -198,18 +152,12 @@ Numbers <- type(function(){
 
 n <- Numbers()
 n$x
-```
 
-```{r}
 n$x2
-```
 
-```{r}
 n$x2 <- 1000
 n$x
-```
 
-```{r}
 n$rand
 n$rand
 n$rand <- 3
@@ -233,9 +181,7 @@ HistoryQueue <- Queue %>%
       queue[[head_idx]]
     }
   })
-```
 
-```{r}
 hq <- HistoryQueue(5, 6, "foo")
 hq$show()
 hq$remove()
@@ -243,7 +189,7 @@ hq$show()
 hq$remove()
 ```
 
-NOTE: there is no inheritance in Q7. But you can rename anything you don't meant to override. 
+NOTE: There is no inheritance in Q7, so you cannot call methods of your parent class. But you can rename anything you don't meant to override. 
 
 ```{r}
 CountingQueue <- Queue %>% implement({
@@ -287,7 +233,7 @@ s2$e$x <- 2
 s1$e$x
 ```
 
-Q7 and R6 shows differnet behavior. In Q7's case, `s1`'s `x` isn't changed with that of `s2`. The `x` in the R6 example lives with the class; it lives with the instance by default in Q7. The R6 example goes on to show a solution with an separate initializer; the same this not necessary in Q7, as the type definition itself is its initializer. 
+Q7 and R6 again show differnet behavior. In Q7's case, `s1`'s `x` isn't changed with that of `s2`. The `x` in the R6 example lives with the generator; the `x` in Q7 lives with the instance. The R6 example goes on to show a solution with an separate initializer; the same this not necessary in Q7, as the type definition itself is its initializer(a separate `initialize()` subroutine can be defined to run once at an object's initialization). 
 
 #### [_Other topics_](https://r6.r-lib.org/articles/Introduction.html#other-topics)
 ##### _Adding members to an existing class_
@@ -314,9 +260,9 @@ s <- Simple()
 s$getx2()
 ```
 
-Notice: In Q7, new code is simply appened to the old, meaning everything will be executed from the beginning to the end. This make it inefficient when you replace something costly to make, like reading in a large amount of data or performing a lengthy calculation. In this case, it's best to make a new type from scratch, or define a common prototype.
+In Q7, new code is simply appened to the old, meaning everything will be executed linearly from the beginning to the end. This make it inefficient when you replace something costly to make, like reading in a large amount of data or performing a lengthy calculation. In this case, it's best to make a new type from scratch, or define a common prototype.
 
-Q7 types need not be locked. 
+Q7 type constructors need not (and cannot) be locked, as they are functions.
 
 #### _Cloning Objects_
 ```{r}
@@ -354,12 +300,24 @@ c2 <- clone(c1)
 c1$s$x <- 2
 c2$s$x
 ```
-The default `clone()` behavior in Q7 is deep. So any nested instances also gets cloned. Like in R6, only instances will be cloned. The example of a custom `deep_clone` method in the R6 document is skipped for brevity. 
+
+The default `clone()` behavior in Q7 is deep (recursive). So any nested instances also gets cloned. Like in R6, only object instances will be cloned deeply. The example of a custom `deep_clone` method in the R6 document is skipped for brevity. 
 
 #### _Printing Q7 objects to the screen_
 ```{r}
+prettyCountingQueue <- type(function(...){
+  extend(CountingQueue)(...)
+}, "prettyCountingQueue")
 
+print.prettyCountingQueue <- function(x){
+  cat("<PrettyCountingQueue> of ", x$get_total(), " elements\n", sep = "")
+}
+
+pq <- prettyCountingQueue(1, 2, "foobar")
+pq
 ```
+Q7 objects do not contain a bound `print()` function. A free `print()` S3 method must be accessible by the calling scope. It is also necessary to extend the prototype in order to give the new type a S3 class for correct method dispatch. 
+
 
 #### _Finalizers_
 ```{r}

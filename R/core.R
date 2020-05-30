@@ -19,7 +19,7 @@ clean_up_keywords <- "suppressWarnings(tryCatch(rm(public, private, active, fina
 #' myAdder <- Adder(1, 2)
 #' myAdder$add_nums()
 #'
-type <- function(x = function(){}, s3 = "default"){
+type <- function(x = function(){}, s3 = "Q7default"){
         x_char <- deparse(substitute(x))
 
         if (grepl("function\\(", x_char[1])) { # if x is a function
