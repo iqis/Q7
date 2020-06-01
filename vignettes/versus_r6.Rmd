@@ -16,7 +16,8 @@ knitr::opts_chunk$set(
 ```
 
 Q7 is expected to be compared with R6. The main difference 
-On a technical level, Q7 is expected to have performance deficiencies when compared to R6. 
+
+Technically, Q7 is expected to suffer from slight performance deficiencies when compared to R6. 
 
 
 #### Terminologies
@@ -203,7 +204,6 @@ CountingQueue <- Queue %>% implement({
       
   get_total <-  function() total
 })
-
 
 cq <- CountingQueue("x", "y")
 cq$get_total()

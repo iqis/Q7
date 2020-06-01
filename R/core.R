@@ -99,7 +99,18 @@ type <- function(x = function(){}, s3 = "Q7default"){
                            "assign('.private', parent.env(.my), envir = parent.env(.my))",
                            "eval(quote(", keywords, "), envir = .private)",
                            "private[initialize] <- function(){}",
-                           "private[finalize] <- function(.my){}",
+                           "private[finalize] <- function(){}",
+                           "private[print] <- function(){
+                           cat(paste0(\"<Q7instance:\", attr(.my, \"s3\"), \">\", \"\n\"))
+
+    element_name_list <- ls(.my, all.names = TRUE)
+    element_class_list <- lapply(element_name_list, function(y) class(get(y, envir = .my)))
+    print_line <- function(name, class){
+        cat(paste0(\"- \", name, \": <\", paste(class, collapse = \", \"), \">\n\"))
+    }
+    mapply(print_line, name = element_name_list, class = element_class_list)
+    invisible(.my)
+                           }",
                            strip_ends(fn_body),
                            "initialize()",
                            "reg.finalizer(.my, finalize, TRUE)",

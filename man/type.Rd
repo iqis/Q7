@@ -4,7 +4,7 @@
 \alias{type}
 \title{Create a Q7 Type}
 \usage{
-type(x = function() { }, s3 = "default")
+type(x = function() { }, s3 = "Q7default")
 }
 \arguments{
 \item{x}{function or expression; becomes the definition of the object}
