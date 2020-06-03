@@ -217,6 +217,7 @@ exposePrivate <- feature({
 
 counter %>% exposePrivate()
 # .private reference appears in the object
+ls(counter, all.names = TRUE)
 counter$.private
 counter$.private$count
 ```
