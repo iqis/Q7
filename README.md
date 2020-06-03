@@ -10,22 +10,59 @@
 <!-- badges: end -->
 
 Q7 enables a postmodern flavor of object-oriented programming (OOP), a
-flexible and powerful paradigm. Q7 features:
+simple and flexible paradigm, leaving behind the grand narrative of
+classical OOP. Q7 features:
 
-  - Compositional manner of construction with `type()`, `feature()` and
-    `implement()`
-  - Define `initialize()` and `finalize()` to run at the beginning and
-    the end
-  - Has `public`, `private`, `final` and `active` binding modifiers
+  - Compose objects with `type()`, `feature()` and `implement()`
+  - `initialize()` and `finalize()` to run at an object’s beginning and
+    the end of life
+  - `public`, `private`, `final` and `active` binding modifiers
 
-`Q7` users can leave behind the grand narrative of the OOP orthodoxy,
-and enjoy
+## Installation
+
+``` r
+# install.packages("devtools")
+devtools::install_github("iqis/Q7")
+```
+
+``` r
+require(Q7)
+#> Loading required package: Q7
+#> Loading required package: magrittr
+```
+
+### Example
+
+Make a Q7 object in 3 easy steps.
+
+1, Define an object type:
+
+``` r
+Adder <- type(function(num1, num2){
+    add_nums <- function(){
+        num1 + num2
+    }
+ })
+```
+
+2, Instantiate the object:
+
+``` r
+myAdder <- Adder(1, 2)
+```
+
+3, Enjoy\!
+
+``` r
+myAdder$add_nums()
+#> [1] 3
+```
 
 #### Smart Objects
 
-  - functions within an object know:
+  - Functions domestic to an object know:
       - Where am I? What are my neighbors?
-  - extensible
+  - Extensible
       - Make variants of an object
 
 #### No Magic
@@ -43,24 +80,3 @@ and enjoy
   - Freely add, change or delete members, ad or post hoc
   - Focuses on “has a”, rather than than “is a” relationships
   - Objects can contain other objects
-
-## Installation
-
-``` r
-# install.packages("devtools")
-devtools::install_github("iqis/Q7")
-```
-
-### Example
-
-To make an object:
-
-``` r
-require(Q7)
-#> Loading required package: Q7
-#> Loading required package: magrittr
-Adder <- type(function(num1, num2){
-  
-  
-})
-```
