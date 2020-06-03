@@ -22,7 +22,6 @@ Technically, Q7 is expected to suffer from slight performance deficiencies when 
 
 #### Terminologies
 
-
 The blueprint for an _object_:
  - R6: a class
  - Q7: a type
@@ -260,9 +259,10 @@ s <- Simple()
 s$getx2()
 ```
 
-In Q7, new code is simply appened to the old, meaning everything will be executed linearly from the beginning to the end. This make it inefficient when you replace something costly to make, like reading in a large amount of data or performing a lengthy calculation. In this case, it's best to make a new type from scratch, or define a common prototype.
+In Q7, new code is simply appened to the old, meaning everything will be executed linearly from the beginning to the end. This make it inefficient when you replace something costly to make, like reading in a large amount of data or performing a lengthy calculation. In this case, it's best to make a new type from scratch, or define a common prototype without the costly members.
 
-Q7 type constructors need not (and cannot) be locked, as they are functions.
+
+Q7 type constructors need not (and cannot) be locked.
 
 #### _Cloning Objects_
 ```{r}
@@ -307,23 +307,22 @@ The default `clone()` behavior in Q7 is deep (recursive). So any nested instance
 ```{r}
 prettyCountingQueue <- type(function(...){
   extend(CountingQueue)(...)
+  print <- function(){
+    cat("<PrettyCountingQueue> of ", get_total(), " elements\n", sep = "")
+  }
 }, "prettyCountingQueue")
-
-print.prettyCountingQueue <- function(x){
-  cat("<PrettyCountingQueue> of ", x$get_total(), " elements\n", sep = "")
-}
 
 pq <- prettyCountingQueue(1, 2, "foobar")
 pq
 ```
-Q7 objects do not contain a bound `print()` function. A free `print()` S3 method must be accessible by the calling scope. It is also necessary to extend the prototype in order to give the new type a S3 class for correct method dispatch. 
-
 
 #### _Finalizers_
 ```{r}
 A <- type(function(){
   private[finalize] <- function(.my){
-        print("Finalizer has been called!")
+    base::print("Finalizer has been called!")
+    # Must always qualify `print()` with package name `base`, 
+    # because it is masked by`print()` in the object masks
   }
 })
 
@@ -331,9 +330,9 @@ obj <- A()
 rm(obj); gc()
 ```
 
-Q7 will not wrap your finalizer function, so you must provide include an argument (could be any name) to represent the object itself.
+For the finalizer function, you must define an argument (`.my`, but could be any name) to represent the object itself.
 
-
+##### Class methods vs. member functions
 ```{r}
 FunctionWrapper <- type({
   fn <- NULL
@@ -358,9 +357,7 @@ a$fn()
 ```{r}
 b <- clone(a)
 
-
 b$get_my()
 b$fn()
-
 ```
 

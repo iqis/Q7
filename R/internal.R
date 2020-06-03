@@ -10,7 +10,6 @@ inject_text <- function(text_1, text_2, index){
       text_1[(index + 1):length(text_1)])
 }
 
-
 migrate_elements <- function(from, to){
     mapply(assign,
            x  = ls(from),
