@@ -99,7 +99,7 @@ type <- function(x = function(){}, s3 = "Q7default"){
                            "assign('.private', parent.env(.my), envir = parent.env(.my))",
                            "eval(quote(", keywords, "), envir = .private)",
                            "private[initialize] <- function(){}",
-                           "private[finalize] <- function(){}",
+                           "private[finalize] <- function(e){}",
                            "private[print] <- function(){
                            cat(paste0(\"<Q7instance:\", attr(.my, \"s3\"), \">\", \"\n\"))
 
