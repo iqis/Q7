@@ -34,7 +34,7 @@ clone <- function(...){
 #'
 #' Type1 <- type(function(num){
 #'   print_num <- function(){
-#'     print(num)
+#'     base::print(num)
 #'   }
 #' })
 #' myType1 <- Type1(1)

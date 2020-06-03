@@ -371,3 +371,92 @@ orange <- repeatWordNTimes("orange", 7)
 orange$repeat_word()
 ```
 
+```{r}
+isIterable <- feature_generic("isIterable")
+
+isIterable.default <- feature({
+    forEach <- function(fn){
+        Vector(sapply(elementData, fn))
+    }
+
+    final[is_iterable] <- TRUE
+})
+
+isLocked <- feature({
+    lockEnvironment(.my, bindings = TRUE)
+})
+
+Vector <- type(function(elementData){
+    elementData <- elementData
+    elementCount <- length(elementData)
+
+    add <- function(e){
+        unlockBinding("elementData", .my)
+        unlockBinding("elementCount", .my)
+            elementData <<- c(elementData, e)
+            elementCount <<- length(elementData)
+        lockBinding("elementData", .my)
+        lockBinding("elementCount", .my)
+        invisible(.my)
+    }
+
+    remove <- function(index){
+        unlockBinding("elementData", .my)
+        unlockBinding("elementCount", .my)
+            elementData <<- elementData[-index - 1]
+            elementCount <<- length(elementData)
+        lockBinding("elementData", .my)
+        lockBinding("elementCount", .my)
+        invisible(.my)
+        }
+
+    clear <- function(){
+        unlockBinding("elementData", .my)
+        unlockBinding("elementCount", .my)
+        elementData <<- c()
+        elementCount <<- length(elementData)
+        lockBinding("elementData", .my)
+        lockBinding("elementCount", .my)
+        invisible(.my)
+    }
+
+    firstElement <- function(){
+        elementData[1]
+    }
+    lastElement <- function(){
+        elementData[elementCount]
+    }
+}, "Vector")  %>%
+    isIterable() %>%
+    isLocked()
+
+nums <- Vector(c(1,2,3))
+nums$elementData
+nums$add(4)
+nums$elementData
+nums$elementCount
+
+nums$remove(0)
+nums$elementData
+
+nums$clear()
+nums$elementData
+nums$elementCount
+
+nums$add(c(554, 665, 776))
+nums$elementData
+
+nums$is_iterable <- FALSE
+
+plus_one <- function(x){
+    x + 1
+}
+
+nums2 <- nums$
+    forEach(plus_one)$
+    remove(0)$
+    add(c(888, 999))
+
+nums2$elementData
+```
+

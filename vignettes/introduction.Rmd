@@ -49,10 +49,6 @@ When you code with inheritance, your mind must navigate from sub- to super-class
   - Appends the expresseion to the object
 
 
-
-
-
-
 Let's make a `String` type and re-pack some base R functions into it, giving the object a distinct API, which some users may find familar with. 
 
 ```{r}
@@ -168,7 +164,6 @@ hasFeatureTwo <- feature({
 })
 
 ```
-
 
 
 #### Private Members
