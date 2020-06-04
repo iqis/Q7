@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 library(Q7)
 ```
 
-
 ### Dogs
 
 ```{r}
@@ -458,5 +457,52 @@ nums2 <- nums$
     add(c(888, 999))
 
 nums2$elementData
+```
+
+
+Microwave
+
+```{r}
+Microwave <- type(function(){
+  food <- NULL
+  put_food <- function(food){
+    if (!is.null(.my$food)) {
+      stop("There's already food.")
+    } else {
+      .my$food <- food
+    }
+  }
+  
+  check_food <- function(){
+    if (is.null(food)) {
+      cat("Empty.\n")
+    } else {
+      cat(paste("The food is", food, "\n"))
+    }
+  }
+  
+  heat <- function(seconds){
+    
+    cat(paste(food, 
+              "is heated for",
+              paste0(seconds, "s\n")))
+    
+  }
+  
+  remove_food <- function(){
+    food <<- NULL
+  }
+  
+})
+
+microwave <- Microwave()
+microwave$check_food()
+microwave$put_food("chicken dinner")
+microwave$put_food("meatballs")
+microwave$heat(30)
+microwave$remove_food()
+microwave$put_food("meatballs")
+microwave$check_food()
+microwave$heat(40)
 ```
 

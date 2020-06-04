@@ -10,7 +10,8 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  errors = TRUE
 )
 ```
 
@@ -18,15 +19,9 @@ knitr::opts_chunk$set(
 library(Q7)
 ```
 
+# Introduction to Q7 Type System
 
-### Make Variants of an Object
-
-Elk will be compared to R6, the premier object system in R; R6 implements classical OOP, which 
-
-With Elk, Objects don't inherit; They grow. 
-
-When you code with inheritance, your mind must navigate from sub- to super-classes from the inside out; Composition, on the otherhand, can be mentally modeled as linear addition to existing code. 
-
+Q7 is a 
 
 ### API
 - `type()`
@@ -48,82 +43,12 @@ When you code with inheritance, your mind must navigate from sub- to super-class
     - any expression (including _features_, but more importantly, an arbitrary expression)
   - Appends the expresseion to the object
 
-
-Let's make a `String` type and re-pack some base R functions into it, giving the object a distinct API, which some users may find familar with. 
-
-```{r}
-require(Q7)
-String <- type(function(string){
-  if (length(string) != 1 || !is.character(string)) { 
-    # we only want this object to hold a 1-length character vector
-    stop("string must be a vector of length 1")
-  }
-  .my$string <- string
-  
-  .my$charAt <- function(index){
-    unlist(strsplit(.my$string, ""))[index + 1]
-  }
-  
-  .my$concat <- function(str){
-    stopifnot(inherits(str, 
-                       "String"))
-    
-    .my$string <- paste0(.my$string, 
-                         str$string)
-    .my
-  }
-  
-  .my$length <- function(){
-    nchar(.my$string)
-  }
-  
-  .my$isEmpty <- function(){
-    nchar(.my$string) == 0
-  }
-  
-  .my$matches <- function(pattern){
-    .my$string <- grepl(pattern, .my$string)
-    .my
-  }
-  
-  .my$replaceFirst <- function(regex, replacement){
-    .my$string <- sub(regex, 
-                      replacement, 
-                      .my$string)
-    .my
-  }
-}, s3 = "String")
-
-print.String <- function(String){
-  if (inherits(String, "Q7instance")) {
-    print(String$string)
-  } else if (inherits(String, "Q7type")) {
-    print(String)
-  }
-}
-```
-
-We have defined a type named _String_, which will produce instances with a S3 class _String_, as well as a S3 method for `print()`. The `$string` member is the vector that holds the data; All other members are bound functions (methods) of the object. They understand that they live inside the `String` object. The `print.String()` function lives in the global scope, and simply reaches into the `String` object and print the `$string$` vector.
-
-`.my` object is a special object that refers to the instance itself. Although it can be safely excluded in most cases, with some precaution in place, the use of `.my` is highly recommended to avoid scope leak.
-
-```{r}
-motto <- String("Carpe")$concat(String(" "))$concat(String("Diem"))
-
-motto$length()
-motto$isEmpty()
-motto$charAt(5)
-motto$replaceFirst("\\s", "-")$charAt(5)
-motto
-```
-
-
-
 Make a type:
 ```{r}
 TypeOne <- type(function(arg1, arg2){
-  
-  
+  add <- function(){
+    arg1 + arg2
+  }
 })
 ```
 `type()` takes a function, which is used to construct an instance. 
@@ -132,19 +57,53 @@ Everything defined within the function's closure becomes members of the object.
 Arguments supplied to the function are accesible to the closure, but not become members of the object themselves. 
 ```{r}
 type_one <- TypeOne(1, 2)
-type_one$...
+ls(type_one)
+type_one$add()
 ```
 
-The object can be modified post-hoc. 
 
+### Reserved Symbols
+
+The following symbols are reserved by the Q7 type system and shall not be re-bound by the user.
+ 
+Binding Modifiers: 
+
+ - `private`: designates a binding in the private environment
+ - `public`: designates a binding in the public environment (default)
+ - `final`: designates an immutable binding in the public environment
+ - `private_final`: designates an immutable binding in the private environment
+ - `active`: deisgnates an active binding in the public environment
+
+Environments: 
+
+ - `.my`: an object's public environment
+ - `.private`: an object's private environment
+ 
+Functions:
+
+ - `initialize`: one that runs at the instantiation of an object
+ - `finalize`: one that runs when an object is garbage collected
+
+
+### Making Variants of an Object
+
+With Q7, Objects don't inherit; They grow. The benefit is obvious. When you code with inheritance, your mind must navigate from sub- to super-classes from the inside out; Composition, on the otherhand, can be mentally modeled as linear addition to existing code. 
+
+The object can be modified post-hoc after instantiation. 
 ```{r}
 type_one %>% implement({
-  
-  
+  substract <- function(){
+    arg1 - arg2
+  }
 })
 ```
 
-The features implemented can be packaged with `feature()`. 
+Features can also be packaged with `feature()` for later use. 
+
+```{r}
+TypeTwo <- type() # we make an empty type
+```
+
 ```{r}
 hasFeatureOne <- feature({
   x <- 1
@@ -162,16 +121,29 @@ hasFeatureTwo <- feature({
     old_y(n) + 1
   }
 })
+```
 
+```{r}
+type_one_with_features <- TypeOne(1,2) %>% 
+  hasFeatureOne() %>% 
+  hasFeatureTwo()
+
+type_two_with_features <- TypeTwo() %>% 
+  hasFeatureOne() %>% 
+  hasFeatureTwo()
+
+type_one_with_features$old_y(1)
+type_two_with_features$old_y(1)
+type_one_with_features$y(1)
+type_two_with_features$y(1)
 ```
 
 
 #### Private Members
-Any member founction can read from and write to the private environment.
+Any domestic founction can read from and write to the private environment. Remember to use the double arrow assignment `<<-` because you want the assignment to pierce the function's closure. Use caution: if the symbol you're assigning to with `<<-` does not exist in either public or private environments, it will end up ouside the object and make a mess.
 ```{r}
-
 Counter <- type(function(){
-  private[count] <- 1
+  private[count] <- 0
   
   add_one <- function(){
     count <<- count + 1
@@ -181,25 +153,20 @@ Counter <- type(function(){
     count
   }
 })
-
 ```
 
 ```{r}
 counter <- Counter()
 ls(counter) # count can't be seen from the out side
-```
 
-
-```{r}
-counter$get_count() # but count can be read by member function
+counter$get_count() # but count can be read by domestic function
 counter$add_one() # ... and be written to
 counter$add_one()
 counter$get_count() # when we read it again the number changes
 ```
 
-
 ##### Get Access to Private Environment
-The private environment (`.private`) is parent of the public environment (`.my`). Parameters supplied to the arguments of the constructor function are implicitly private. 
+The private environment (`.private`) is parent of the public environment (`.my`). Parameters supplied to the arguments of the constructor function are implicitly private. When two members in private and public environments have the same name, the one in pulbic will win, and the one in private can only be explicitly qualified with `.private`.
 
 The following code allows direct outside access to the `count` object.
 ```{r}
@@ -216,4 +183,8 @@ ls(counter, all.names = TRUE)
 counter$.private
 counter$.private$count
 ```
+
+
+
+
 

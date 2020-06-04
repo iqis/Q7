@@ -9,14 +9,15 @@
 
 <!-- badges: end -->
 
-Q7 enables a postmodern flavor of object-oriented programming (OOP), a
-simple and flexible paradigm, leaving behind the grand narrative of
-classical OOP. Q7 features:
+Q7 is a type system that enables a postmodern flavor of object-oriented
+programming (OOP), a simple and flexible paradigm, leaving behind the
+grand narrative of classical OOP. Q7 features:
 
-  - Compose objects with `type()`, `feature()` and `implement()`
+  - `type()`, `feature()` and `implement()` to compose objects.
   - `initialize()` and `finalize()` to run at an object’s beginning and
     the end of life
-  - `public`, `private`, `final` and `active` binding modifiers
+  - `public`, `private`, `final`, `private_final` and `active` binding
+    modifiers
 
 ## Installation
 
@@ -58,14 +59,20 @@ myAdder$add_nums()
 #> [1] 3
 ```
 
-#### Smart Objects
+##### Smart Objects
 
   - Functions domestic to an object know:
       - Where am I? What are my neighbors?
   - Extensible
-      - Make variants of an object
+      - User can make variants of an object
 
-#### No Magic
+##### Compositional Construction
+
+  - Freely add, change or delete members, ad or post hoc
+  - Focuses on *has a*, rather than than *is a* relationships
+  - Objects can contain references to other objects
+
+##### No Magic
 
   - Mechanism decomposes into basic R constructs
       - A *type* is a function
@@ -75,8 +82,33 @@ myAdder$add_nums()
       - Perform any action on or within an object
       - Normal scoping rules
 
-#### Compositional Manner of Construction
+**Origin of the Name**
 
-  - Freely add, change or delete members, ad or post hoc
-  - Focuses on “has a”, rather than than “is a” relationships
-  - Objects can contain other objects
+The package was named tounge-in-cheek `foo` for *Freestyle Object
+Orientation*, but the author soon realized the smart-a\*\* name is going
+to backfire and cause real confusions. The latest OO system in R’s
+ecosystem has been S3, S4, S5(RC) and R6. Desiring an air of
+seriousness, the author buttoned up and dialed the alphabet up and the
+numberal down: Q7, the next-in-line, yet with a distinct philosophy.
+Trivia: Both R6 and Q7 are model names of motor vehicles.
+
+### When to Use OOP?
+
+R is a functional programming language with prodedural programming
+capabilities. The prodedural capabilites allows OOP potentials, which Q7
+is built upon.
+
+R programmers has been blessed with the relative simplicity of.
+
+    Data is data.
+    
+    --- Liye Ma  
+        Professor, University of Maryland
+
+In
+
+Isn’t OOP bad for your health?
+
+R developers has been blessed with
+
+Data is data.

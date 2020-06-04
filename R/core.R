@@ -30,21 +30,18 @@ type <- function(x = function(){}, s3 = "Q7default"){
         }
 
         keywords <- deparse(quote({
-            private <- structure(NA, class = "private")
-            `[<-.private` <- function(., name, value){
-                name <- deparse(substitute(name))
-                assign(name, value, envir = .private)
-                .
-            }
-            # lockBinding("private", .private)
-
             public <- structure(NA, class = "public")
             `[<-.public` <- function(., name, value){
                 name <- deparse(substitute(name))
                 assign(name, value, envir = .my)
                 .
             }
-            # lockBinding("public", .private)
+            private <- structure(NA, class = "private")
+            `[<-.private` <- function(., name, value){
+                name <- deparse(substitute(name))
+                assign(name, value, envir = .private)
+                .
+            }
 
             active <- structure(NA, class = "active")
             `[<-.active` <- function(., name, value){
@@ -52,7 +49,6 @@ type <- function(x = function(){}, s3 = "Q7default"){
                 makeActiveBinding(name, value, .my)
                 .
             }
-            # lockBinding("active", .private)
 
             final <- structure(NA, class = "final")
             `[<-.final` <- function(., name, value){
@@ -70,7 +66,6 @@ type <- function(x = function(){}, s3 = "Q7default"){
                     .my)
                 .
             }
-            # lockBinding("final", .private)
 
             private_final <- structure(NA, class = "private_final")
             `[<-.private_final` <- function(., name, value){
@@ -88,7 +83,6 @@ type <- function(x = function(){}, s3 = "Q7default"){
                     .private)
                 .
             }
-            # lockBinding("private_final", .private)
         }))
 
         fn_body <- deparse(body(fn))

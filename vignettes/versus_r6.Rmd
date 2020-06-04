@@ -15,9 +15,15 @@ knitr::opts_chunk$set(
 )
 ```
 
-Q7 is expected to be compared with R6. The main difference 
+Q7 is expected to be compared with R6, the premier object facility in R. Q7 covers the majority of R6 capabilities. The main difference is that Q7 promotes compositional object construction, instead of hereditary. 
 
-Technically, Q7 is expected to suffer from slight performance deficiencies when compared to R6. 
+- Compositonal: I put a plasma cannon on my spaceship, then expanded the cargo area.
+- Hereditary: I made my spaceship a special kind of spaceship that has a plasma cannon, then made it more special with an expanded cargo area.
+
+However, strictly speaking, Q7 uses more memory than R6. Q7 creates a separate copy of a member for every instance of an object, while in R7 they point to a common ancestor. But in most use cases this difference is negligible. Q7 is not expected to suffer from other performance deficiencies. 
+
+
+In exchange, the portability issue is much easier to solve in Q7.
 
 
 #### Terminologies
@@ -38,10 +44,6 @@ Functions defined inside an object
    - a domestic function (as opposed to a foreign function)
 
 
-- Compositonal: I put a plasma cannon on my spaceship, then expanded the cargo area.
-- Hereditary: I made my spaceship a special kind of spaceship that has a plasma cannon, then further made it special with an expanded cargo area.
-
-
 The following is the equivalent to examples from R6's [Introduction](https://r6.r-lib.org/articles/Introduction.html), leaving out original comments & explainations. 
 
 You can compare the the implementation of R6 and Q7 side-by-side. 
@@ -50,7 +52,7 @@ You can compare the the implementation of R6 and Q7 side-by-side.
 library(Q7)
 ```
 
-#### [_Basics_](https://r6.r-lib.org/articles/Introduction.html#basics)
+### [Basics](https://r6.r-lib.org/articles/Introduction.html#basics)
 ```{r}
 Person <- type(function(name, hair){
   name <- name
@@ -78,7 +80,7 @@ ann$set_hair("red")
 ann$hair
 ```
 
-#### [_Private members_](https://r6.r-lib.org/articles/Introduction.html#private-members)
+### [Private members](https://r6.r-lib.org/articles/Introduction.html#private-members)
 
 ```{r}
 Queue <- type(function(...){
@@ -136,7 +138,7 @@ q$remove()
 q$remove()
 ```
 
-#### [_Active Bindings_](https://r6.r-lib.org/articles/Introduction.html#active-bindings)
+### [Active Bindings](https://r6.r-lib.org/articles/Introduction.html#active-bindings)
 
 ```{r}
 Numbers <- type(function(){
@@ -212,7 +214,7 @@ cq$remove()
 cq$get_total()
 ```
 
-# [_Fields containing reference objects_](https://r6.r-lib.org/articles/Introduction.html#fields-containing-reference-objects)
+### [Fields containing reference objects](https://r6.r-lib.org/articles/Introduction.html#fields-containing-reference-objects)
 
 ```{r}
 SimpleClass <- type(function(){
@@ -234,8 +236,8 @@ s1$e$x
 
 Q7 and R6 again show differnet behavior. In Q7's case, `s1`'s `x` isn't changed with that of `s2`. The `x` in the R6 example lives with the generator; the `x` in Q7 lives with the instance. The R6 example goes on to show a solution with an separate initializer; the same this not necessary in Q7, as the type definition itself is its initializer(a separate `initialize()` subroutine can be defined to run once at an object's initialization). 
 
-#### [_Other topics_](https://r6.r-lib.org/articles/Introduction.html#other-topics)
-##### _Adding members to an existing class_
+### [Other topics](https://r6.r-lib.org/articles/Introduction.html#other-topics)
+#### Adding members to an existing class
 ```{r}
 Simple <- type(function(){
   x <- 1
@@ -264,7 +266,7 @@ In Q7, new code is simply appened to the old, meaning everything will be execute
 
 Q7 type constructors need not (and cannot) be locked.
 
-#### _Cloning Objects_
+#### Cloning Objects
 ```{r}
 Simple <- type(function(){
   x <- 1
@@ -303,7 +305,7 @@ c2$s$x
 
 The default `clone()` behavior in Q7 is deep (recursive). So any nested instances also gets cloned. Like in R6, only object instances will be cloned deeply. The example of a custom `deep_clone` method in the R6 document is skipped for brevity. 
 
-#### _Printing Q7 objects to the screen_
+#### Printing Q7 objects to the screen
 ```{r}
 prettyCountingQueue <- type(function(...){
   extend(CountingQueue)(...)
@@ -316,7 +318,7 @@ pq <- prettyCountingQueue(1, 2, "foobar")
 pq
 ```
 
-#### _Finalizers_
+#### Finalizers
 ```{r}
 A <- type(function(){
   private[finalize] <- function(.my){
@@ -332,7 +334,9 @@ rm(obj); gc()
 
 For the finalizer function, you must define an argument (`.my`, but could be any name) to represent the object itself.
 
-##### Class methods vs. member functions
+#### Class methods vs. member functions
+
+In Q7 context, _domestic functions vs foreign functions_
 ```{r}
 FunctionWrapper <- type({
   fn <- NULL
