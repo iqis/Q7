@@ -1,0 +1,107 @@
+---
+title: "OOP for Shiny"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{oop_shiny}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>", 
+  errors = TRUE
+)
+```
+
+```{r setup}
+library(Q7)
+```
+
+# OOP for Shiny
+
+R is a functional programming language. Built with R, the web framework Shiny also employs this paradigm. 
+This document shows one of many ways to employ OO patterns in a Shiny app with Q7 type system. 
+
+
+Each module is an object that has the following members: 
+
+ - `id`: constructor parameter, an aribitrary string to represent the whole module
+ - `ns`: constructor parameter, a Shiny namespace function, defaults to depend on `id`, but can be overidden
+ - `dev_mode`: constructor parameter, a simple boolean value to tell the module to turn some things on or off
+ - `ui`: a _ui_ module fragment
+ - `server`: definition and call to a _server_ module fragment
+ - abstractions necessary to the above
+ - `state`: an reference object made by `reactiveValues()` or `new.env()`, which esposes the what's meaningful to other modules.
+
+
+```{r}
+ShinyModule <- type(function(
+  id = uuid::UUIDgenerate(FALSE), 
+  ns = NS(id), 
+  dev_mode = FALSE
+){
+  # The following are not strictly necessary, as they will be overidden,
+  # but serve as good reminders
+  ui <- function(){tagList(
+    # ...
+  )} 
+  
+  server <- function(){callModule(function(input, output, session){
+    # ...
+  }, id)}
+  
+  state <- reactiveValues()
+})
+
+LoadData <- ShinyModule %>% 
+  implement({
+    ui <- function(){
+      
+    }
+    
+    server
+    
+    
+  })
+
+PlotChart <- ShinyModule %>% 
+  implement({
+    ui
+    
+    server
+    
+    
+  })
+
+```
+
+ 
+```{r eval=FALSE}
+require(shiny)
+require(Q7)
+
+loadData <- LoadData()
+plotChart <- PlotChart()
+
+shinyApp(
+  function(){fluidPage(sidebarLayout(  # UI
+    loadData$ui(),
+    plotChart$ui()
+  ))},
+  function(input, output, session){ # Server
+    loadData$server()
+    plotChart$server()
+  }
+)
+```
+ 
+Segregation of namespace and state. 
+
+If you use `shinydashboard`, each is naturally a candidate for a top-level module. 
+
+
+If you just need to define a input or output panel that has similarly organized and configured, you don't need a module.
+
+

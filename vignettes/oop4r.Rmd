@@ -1,0 +1,212 @@
+---
+title: "oop4r"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{oop4r}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(Q7)
+```
+
+R is a functional programming language with prodedural programming capabilities. The prodedural capabilites allows OOP potentials, upon which Q7 is built.
+
+R programmers have enjoyed the relative simplicity and clarity of functional programming, in which:
+
+ - Everything that exists is an object. 
+ - Everything that happens in a function call.
+
+Objects and functions live separately from each other. You can pass one object as a parameter to a function, and that function will spit out another object; you can bind this new object to another name, and pass it to yet another function. It is often written in one of the following styles: 
+
+```{r}
+# Onion style
+motto <- toupper(sub("\\s", 
+                     " ", 
+                     trimws(paste(" carpe", 
+                                  "diem "),
+                            which = "both")))
+motto
+```
+
+
+```{r}
+# Pipe style
+motto <- " carpe" %>% 
+  paste("diem ") %>% 
+  trimws(which = "both") %>% 
+  sub("\\s", "-", .)
+  toupper()
+
+motto
+```
+
+
+```{r}
+# Zigzag style
+motto <- " carpe"
+motto <- paste(motto, "diem ")
+motto <- trimws(motto, which = "both")
+motto <- sub("\\s", "-", motto)
+motto <- toupper(motto)
+
+motto
+```
+
+
+The first two, _Onion_ and _Pipe_ styles, have all the function calls contained in a single expression. If we know what goes into a function, we are sure to know what comes out of it. These are very easy to reason about. 
+
+The third introduces a little potention hazard. R allows you to re-use a name and assign new value to it. If you accidentally ran the second line twice, you'll end up with two _diem_'s. But since this example is made of consecutive re-assignments, if you treat it like a solid chunk, you are mostly going to be fine.
+
+In all of these cases, the objects are simply being manipulated by the function calls, like a block of wood in the hands of a sculptor, or materials on an assembly line. 
+
+```
+Data is data.
+
+--- Liye Ma
+    Professor, University of Maryland
+``` 
+
+### Introduction to OOP 
+
+Compared to the _dumb_ objects in FP, OOP objects are _smart_; they not only exist, but also can act. 
+
+Objects act through their methods, which are functions that are aware of itself being side an object, and can access other members of the same object. 
+
+In this 
+
+OO objects are blessed with agency, which might not always be a blessing to the programmer. It is not uncommon to misuse
+
+Like demonstrated above, if you think of something new that you want to do to an object, with FP, you may simply make another function that's can handle the object. With strictly OOP, you would have to modify or extend the class to give it a new method; and objects carry around methods they might not need once in their lifetime, hence the adage "I need banana; they give chimpanzee holding banana, and whole forest". 
+
+You will build a wobbly tower of many classes, with things you don't actually need at the lowest end. 
+
+OOP forces you to think abstract things as if tangile, then forces you to classify them these falsly tangible things. Worse, tangibles things to begin with, are already really hard to classify, imagine: 
+
+ - You had chairs. Now you have bean bags. 
+ - You had bowl. Now you have shipping container.
+ 
+Good object should be constructed with addition: 
+ - You have pen, you have apple... Bam! Apple pen. 
+ - You have pen, you have pineapple... Bam! Pineapple pen.
+
+Get philosophical.
+
+`Q7` seeks to address some issues of this nature.
+
+ 
+If you look for "Washington" in the District of Columbia, you will get the nation's capital city. If you lok for "Washington" in the whole United States, you will get a state on the Pacific northwest. 
+If you look for "Fairfax" in Virginia, it will be a county; looked up in the county itself it will be a city; and if taken to Los Angeles, CA, it's going to be a neighborhood. 
+
+Objects are like walls that enclose and area, in which things has unique names. They are tiny namespaces. 
+
+Wherever there are walls, there shalls be doors. If objects need to talk to each other, one needs to contain a reference to another. 
+
+Before you decide to make anything into an object, think: 
+ - Can I get by with just "dumb" objects and free functions?
+
+
+
+We have a primitive data type, a character vector.
+
+Let's make a `String` type and re-pack some base R functions into it.
+
+```{r}
+String <- type(function(string){
+  if (length(string) != 1 || !is.character(string)) { 
+    # we only want this object to hold a 1-length character vector
+    stop("string must be a vector of length 1")
+  }
+  
+  string <- string
+  
+  charAt <- function(index){
+    unlist(strsplit(.my$string, ""))[index + 1]
+  }
+  
+  concat <- function(str){
+    stopifnot(inherits(str, 
+                       "String"))
+    
+    .my$string <- paste0(.my$string, 
+                         str$string)
+    .my
+  }
+  
+  length <- function(){
+    nchar(.my$string)
+  }
+  
+  isEmpty <- function(){
+    nchar(.my$string) == 0
+  }
+  
+  matches <- function(pattern){
+    string <<- grepl(pattern, string)
+    .my
+  }
+  
+  replaceFirst <- function(regex, replacement){
+    string <<- sub(regex, 
+                  replacement, 
+                  string)
+    .my
+  }
+  
+  print <- function(){
+    cat(string)
+  }
+}, s3 = "String")
+
+```
+
+We have defined a type named _String_, which will produce instances with a S3 class _String_, as well as a S3 method for `print()`. The `$string` member is the vector that holds the data; All other members are bound functions (methods) of the object. They understand that they live inside the `String` object.
+
+
+`.my` object is a special object that refers to the instance itself. Although it can be safely excluded in most cases, with some precaution in place, the use of `.my` is highly recommended to avoid scope leak.
+
+```{r}
+motto <- String("carpe")$
+  concat(String("-"))$
+  concat(String("diem"))
+
+motto$length()
+motto$isEmpty()
+motto$charAt(5)
+motto$replaceFirst("\\s", "-")$charAt(5)
+motto
+```
+
+
+With methods bound and domestic to the object, you can just browse from the options available to you. If you type `$`, your options are shown and you can navigte up and down, insteadf of holding everything in your head. 
+
+Other benefits are mainly aesthetic and ease of use. 
+
+
+
+
+
+
+Write code that is modular. 
+
+Composition is a great way to express commonalities between different types. 
+
+Advices: 
+ - Search for "design patterns" to get inspired. 
+ - But, do not take these seriously.
+
+ - 
+ 
+OOP
+
+
+
+Domain-oriented. 
