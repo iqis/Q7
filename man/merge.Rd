@@ -48,4 +48,5 @@ p1 <- p1 \%>\% merge(p2)
 # note the the "word" for both methods became that of p2
 p1$whisper()
 p1$scream()
+
 }
