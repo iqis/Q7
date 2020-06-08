@@ -121,3 +121,54 @@ list2inst <- function(x, s3 = "default", parent = parent.frame(), ...){
   structure(instance,
             class = s3)
 }
+
+#' Merge all Members of Two Instances
+#'
+#' All public and private members of instance 2 will be
+#' copied to instance 1, overwriting any of the same names.
+#'
+#' @param inst1 instance to move members to
+#' @param inst2 instance to move members from
+#'
+#' @return Q7 instance, with environment identity of \code{inst1} and members from both instances.
+#' @export
+#'
+#' @examples
+#'
+#' Screamer <- type(function(words){
+#'   scream <- function(){
+#'     paste0(paste(words,
+#'                  collapse = " "),
+#'            "!!!")
+#'   }
+#' })
+#'
+#' Whisperer <- type(function(words){
+#'   whisper <- function(){
+#'     paste0("shhhhhhh.....",
+#'            paste(words,
+#'                  collapse = " "),
+#'            "...")
+#'   }
+#' })
+#'
+#' p1 <- Screamer("I love you")
+#' p1$scream()
+#'
+#' p2 <- Whisperer("My parents came back")
+#' p2$whisper()
+#'
+#' p1 <- p1 %>% merge(p2)
+#'
+#' # note the the "word" for both methods became that of p2
+#' p1$whisper()
+#' p1$scream()
+#'
+merge <- function(inst1, inst2) {
+  stopifnot(is_instance(inst1) && is_instance(inst2))
+  migrate_elements(inst2, inst1)
+  migrate_elements(parent.env(inst2), parent.env(inst1))
+  migrate_fns(inst2, inst1)
+  migrate_fns(parent.env(inst2), parent.env(inst1))
+  inst1
+}
