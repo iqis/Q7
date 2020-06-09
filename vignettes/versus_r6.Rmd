@@ -20,11 +20,6 @@ Q7 is expected to be compared with R6, the premier object facility in R. Q7 cove
 - Compositonal: I put a plasma cannon on my spaceship, then expanded the cargo area.
 - Hereditary: I made my spaceship a special kind of spaceship that has a plasma cannon, then made it more special with an expanded cargo area.
 
-However, strictly speaking, Q7 uses more memory than R6. Q7 creates a separate copy of a member for every instance of an object, while in R7 they point to a common ancestor. But in most use cases this difference is negligible. Q7 is not expected to suffer from other performance deficiencies. 
-
-
-In exchange, the portability issue is much easier to solve in Q7.
-
 
 #### Terminologies
 
@@ -42,7 +37,6 @@ Functions defined inside an object
  - Q7: 
    - a bound function (as opposed to a free function) 
    - a domestic function (as opposed to a foreign function)
-
 
 The following is the equivalent to examples from R6's [Introduction](https://r6.r-lib.org/articles/Introduction.html), leaving out original comments & explainations. 
 

@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{localize}
 \alias{localize}
-\title{Localize a Function's Environment}
+\title{Make a Localized Copy of a Q7 Type or Instance}
 \usage{
-localize(fn, envir = parent.frame())
+localize(obj, envir = parent.frame())
 }
 \arguments{
-\item{fn}{function}
+\item{obj}{Q7 type or instance}
 
 \item{envir}{environment}
 }
@@ -15,5 +15,5 @@ localize(fn, envir = parent.frame())
 function
 }
 \description{
-Localize a Function's Environment
+Make a Localized Copy of a Q7 Type or Instance
 }

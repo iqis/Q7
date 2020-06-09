@@ -43,7 +43,7 @@ motto
 motto <- " carpe" %>% 
   paste("diem ") %>% 
   trimws(which = "both") %>% 
-  sub("\\s", "-", .)
+  sub("\\s", "-", .) %>% 
   toupper()
 
 motto
@@ -77,34 +77,45 @@ Data is data.
 
 ### Introduction to OOP 
 
-Compared to the _dumb_ objects in FP, OOP objects are _smart_; they not only exist, but also can act. 
+Compared to the _dumb_ objects in FP, OOP objects are _smart_; they not only exist, but also can act. They are compounds of fields and methods, in traditional OOP parlance.
 
 Objects act through their methods, which are functions that are aware of itself being side an object, and can access other members of the same object. 
 
-In this 
 
-OO objects are blessed with agency, which might not always be a blessing to the programmer. It is not uncommon to misuse
 
-Like demonstrated above, if you think of something new that you want to do to an object, with FP, you may simply make another function that's can handle the object. With strictly OOP, you would have to modify or extend the class to give it a new method; and objects carry around methods they might not need once in their lifetime, hence the adage "I need banana; they give chimpanzee holding banana, and whole forest". 
 
-You will build a wobbly tower of many classes, with things you don't actually need at the lowest end. 
+OO objects are blessed with agency, which might not always be a blessing to the programmer. Becuse it is difficult to deal with the relationship among objects and properly delegate responsibilities, itt is not uncommon that seasoned programmers misuse objects and create a web of mess. 
 
-OOP forces you to think abstract things as if tangile, then forces you to classify them these falsly tangible things. Worse, tangibles things to begin with, are already really hard to classify, imagine: 
+If you think of something new that you want to do to an object, with FP, you may simply make another function that's can handle the object. With strictly OOP, you would have to modify or extend the class to give it a new method; and objects carry around methods they might not need once in their lifetime, hence the adage "I need banana; they give chimpanzee holding banana, and whole forest". 
+
+
+Inheritance is cumbersome
+
+objects carry the baggage of their ancestry. 
+
+OOP programmers often desire the ability to modify a class or an instantce on-the-fly, for this one-off edge case, or for debugging. 
+
+Lacking discipline and caution, the developer will eventually build a wobbly tower of many unnecessary classes. 
+
+OOP also forces you to think abstract things as if tangile, then forces you to classify them these falsly tangible things. Worse, tangibles things to begin with, are already really hard to classify, imagine: 
 
  - You had chairs. Now you have bean bags. 
- - You had bowl. Now you have shipping container.
+   - Are bean bags chairs? 
+ - You had bowl. Now you have shipping container. 
+   - Both obviously a "container", but what's common between them that you could abstract away?
  
 Good object should be constructed with addition: 
- - You have pen, you have apple... Bam! Apple pen. 
- - You have pen, you have pineapple... Bam! Pineapple pen.
-
-Get philosophical.
+ - You have pen, you have apple... 
+   - Bam! Apple pen. 
+ - You have pen, you have pineapple... 
+   - Bam! Pineapple pen.
 
 `Q7` seeks to address some issues of this nature.
 
- 
+Objects should be used primarily as a tiny namespace. 
+
 If you look for "Washington" in the District of Columbia, you will get the nation's capital city. If you lok for "Washington" in the whole United States, you will get a state on the Pacific northwest. 
-If you look for "Fairfax" in Virginia, it will be a county; looked up in the county itself it will be a city; and if taken to Los Angeles, CA, it's going to be a neighborhood. 
+If you look for "Fairfax" in Virginia, it will be a county; looked up in the county itself it will be a city; and if taken to Los Angeles, CA, it's a neighborhood. 
 
 Objects are like walls that enclose and area, in which things has unique names. They are tiny namespaces. 
 
@@ -114,9 +125,38 @@ Before you decide to make anything into an object, think:
  - Can I get by with just "dumb" objects and free functions?
 
 
+With methods bound and domestic to the object, you can just browse from the options available to you. If you type `$`, your options are shown and you can navigte up and down, insteadf of holding everything in your head. 
+
+Other benefits are mainly aesthetic and ease of use. 
+
+Composition is a great way to express commonalities between different types. 
+
+
+Another common narrative in classical OOP is "information hiding", which is to make data(fields) private, and define "getters and setters" to read and manipulate the field. 
+
+R is a 
+
+Who are you hiding it from? Your co-workers, your boss, your client, or yourself? 
+
+There cannot be truly private in an interpreted language like R or Python. 
+
+
+Sometimes it is meaningful to reduce the surface area of an object by hiding away things that are not useful or goes against your intention when being accessed alone. Reducing clutter is alway good. Therefore, Q7 does support private members. Use `private` keyword
+
+When you don't want a binding be changed, you can use the `final` or `private_final` keywords. 
+
+
+Be aware when: 
+
+ - A type you're trying to define only contain functions, but no data of its own.
+ - 
+
+Advices: 
+ - Search for "design patterns" to get ideas. 
+ - But, do not take these seriously.
+
 
 We have a primitive data type, a character vector.
-
 Let's make a `String` type and re-pack some base R functions into it.
 
 ```{r}
@@ -184,29 +224,3 @@ motto$charAt(5)
 motto$replaceFirst("\\s", "-")$charAt(5)
 motto
 ```
-
-
-With methods bound and domestic to the object, you can just browse from the options available to you. If you type `$`, your options are shown and you can navigte up and down, insteadf of holding everything in your head. 
-
-Other benefits are mainly aesthetic and ease of use. 
-
-
-
-
-
-
-Write code that is modular. 
-
-Composition is a great way to express commonalities between different types. 
-
-Advices: 
- - Search for "design patterns" to get inspired. 
- - But, do not take these seriously.
-
- - 
- 
-OOP
-
-
-
-Domain-oriented. 

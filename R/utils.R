@@ -1,14 +1,23 @@
-#' Localize a Function's Environment
+#' Make a Localized Copy of a Q7 Type or Instance
 #'
-#' @param fn  function
+#'
+#' @param obj Q7 type or instance
 #' @param envir environment
 #'
 #' @return function
 #' @export
-localize <- function(fn, envir = parent.frame()){
-  stopifnot(is.function(fn))
-  environment(fn) <- envir
-  fn
+localize <- function(obj, envir = parent.frame()){
+  # NOTE convert method dispatch with S3?
+  if (is_type(obj)) {
+    environment(obj) <- envir
+    return(obj)
+  } else if (is_instance(obj)) {
+    res <- clone(obj)
+    parent.env(res) <- envir
+    return(res)
+  } else {
+    stop("Object must be Q7 type or instance.\n")
+  }
 }
 
 #' Clone
