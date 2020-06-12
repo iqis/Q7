@@ -1,8 +1,6 @@
-clean_up_keywords <- "suppressWarnings(tryCatch(rm(public, private, active, final, private_final, .my), error = function(e){}))"
-
 #' Create a Q7 Type
 #'
-#' @param x function or expression; becomes the definition of the object
+#' @param x function or expression; becomes the definition of the obcject
 #' @param s3 S3 class of the object; necessary when using
 #'
 #' @return Q7 type; function
@@ -46,41 +44,40 @@ type <- function(x = function(){}, s3 = "Q7default"){
             active <- structure(NA, class = "active")
             `[<-.active` <- function(., name, value){
                 name <- deparse(substitute(name))
+                `if`(exists(name,
+                            .my,
+                            inherits = FALSE),
+                     rm(list = name,
+                        envir = .my))
                 makeActiveBinding(name, value, .my)
+                .
+            }
+
+            private_active <- structure(NA, class = "private_active")
+            `[<-.private_active` <- function(., name, value){
+                name <- deparse(substitute(name))
+                `if`(exists(name,
+                            .private,
+                            inherits = FALSE),
+                     remove(list = name,
+                        envir = .private))
+                makeActiveBinding(name, value, .private)
                 .
             }
 
             final <- structure(NA, class = "final")
             `[<-.final` <- function(., name, value){
                 name <- deparse(substitute(name))
-                makeActiveBinding(
-                    name,
-                    function(x){
-                        if (missing(x)) {
-                            return(value)
-                        } else {
-                            stop("Cannot change value of a final binding.")
-                            return(NULL)
-                        }
-                    },
-                    .my)
+                assign(name, value, .my)
+                lockBinding(name, .my)
                 .
             }
 
             private_final <- structure(NA, class = "private_final")
             `[<-.private_final` <- function(., name, value){
                 name <- deparse(substitute(name))
-                makeActiveBinding(
-                    name,
-                    function(x){
-                        if (missing(x)) {
-                            return(value)
-                        } else {
-                            stop("Cannot change value of a final binding.")
-                            return(NULL)
-                        }
-                    },
-                    .private)
+                assign(name, value, .private)
+                lockBinding(name, .private)
                 .
             }
         }))
@@ -110,7 +107,7 @@ type <- function(x = function(){}, s3 = "Q7default"){
                            "reg.finalizer(.my, finalize, TRUE)",
                            paste0("class(.my) <- c('", s3, "', 'Q7instance')"),
                            paste0("attr(.my, \"s3\") <- \"", s3, "\""),
-                           clean_up_keywords,
+                           back_matter,
                            "return(.my)",
                            "})()",
                            "}"),
@@ -238,7 +235,7 @@ feature_generic <- function(s3, ...){
 feature <- function(expr){
     expr <- deparse(substitute(expr))
     expr <- inject_text(expr,
-                        clean_up_keywords,
+                        back_matter,
                         length(expr) - 1)
     feature_fn <- function(obj = parent.frame()){
         obj_classes <- class(obj)
@@ -280,7 +277,7 @@ feature <- function(expr){
 implement <- function(obj, feat) {
     feat <- deparse(substitute(feat))
     feat <- inject_text(feat,
-                        clean_up_keywords,
+                        back_matter,
                         length(feat) - 1)
     obj_classes <- class(obj)
 
@@ -296,3 +293,5 @@ implement <- function(obj, feat) {
     }
     invisible(structure(obj, class = obj_classes))
 }
+
+back_matter <- c("suppressWarnings(tryCatch(rm(public, private, active, final, private_final, .my), error = function(e){}))")
