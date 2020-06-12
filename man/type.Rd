@@ -7,7 +7,7 @@
 type(x = function() { }, s3 = "Q7default")
 }
 \arguments{
-\item{x}{function or expression; becomes the definition of the object}
+\item{x}{function or expression; becomes the definition of the obcject}
 
 \item{s3}{S3 class of the object; necessary when using}
 }
