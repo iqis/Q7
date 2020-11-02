@@ -246,7 +246,7 @@ feature <- function(expr){
             obj_fn_body <- strip_ends(deparse(body(obj)))
             obj_fn_body <- inject_text(text_1 = obj_fn_body,
                                    text_2 = expr,
-                                   index = length(obj_fn_body) - 9) # number 8 see implement()
+                                   index = length(obj_fn_body) - 9) # number 9 see implement()
             body(obj) <- parse(text = c("{", obj_fn_body, "}"))
         }
         invisible(structure(obj, class = obj_classes))
@@ -287,7 +287,7 @@ implement <- function(obj, feat) {
         feat <- strip_ends(feat)
         obj_fn_body <- strip_ends(deparse(body(obj)))
         obj_fn_body <- inject_text(obj_fn_body, feat, length(obj_fn_body) - 9)
-        # 8 is the number of lines of in the end of the function that must be executed at last
+        # 9 is the number of lines of in the end of the function that must be executed at last
         # see type()
         body(obj) <- parse(text = c("{", obj_fn_body, "}"))
     }

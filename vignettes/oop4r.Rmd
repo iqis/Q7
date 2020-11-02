@@ -18,12 +18,13 @@ knitr::opts_chunk$set(
 library(Q7)
 ```
 
-R is a functional programming language with prodedural programming capabilities. The prodedural capabilites allows OOP potentials, upon which Q7 is built.
+R is a functional programming (FP) language with imperative programming capabilities, which allow Q7 to enable object-oriented programming (OOP).
 
 R programmers have enjoyed the relative simplicity and clarity of functional programming, in which:
 
- - Everything that exists is an object. 
- - Everything that happens in a function call.
+ - Everything that exists is an object
+ - Everything that happens is a function call
+ - Some objects are functions
 
 Objects and functions live separately from each other. You can pass one object as a parameter to a function, and that function will spit out another object; you can bind this new object to another name, and pass it to yet another function. It is often written in one of the following styles: 
 
@@ -72,49 +73,49 @@ In all of these cases, the objects are simply being manipulated by the function 
 Data is data.
 
 --- Liye Ma
-    Professor, University of Maryland
+    Professor
+    R.H. Smith School of Business, University of Maryland
 ``` 
 
 ### Introduction to OOP 
 
-Compared to the _dumb_ objects in FP, OOP objects are _smart_; they not only exist, but also can act. They are compounds of fields and methods, in traditional OOP parlance.
+Compared to the _dumb_ objects in FP, OOP objects are _smart_; they not only exist, but also can _act_. 
 
-Objects act through their methods, which are functions that are aware of itself being side an object, and can access other members of the same object. 
+In traditional OOP parlance, objects are compounds of _fields_ and _methods_, which are collectivley called _members_. Fields are values and methods are functions; typically, methods can directly access other members of the same object. A `Dog` object may bark, and a `Clock` object may tell you the time.
 
+## Culprit of Inheritance
 
+OO objects are blessed with agency, which might not always be a blessing to the programmer. Becuse it is difficult to deal with the relationship among objects and properly delegate responsibilities, it is not uncommon that seasoned programmers create a web of spaghetti with many objects working poorly together. 
 
+For example, if you think of something new that you want to do to an object, with FP, you may simply make another function that's can handle the object. With strictly OOP, you would have to modify or extend the class to give it a new method; and objects carry around methods they might not need once in their lifetime, hence the adage "I need banana; they give chimpanzee holding banana, and whole forest". 
 
-OO objects are blessed with agency, which might not always be a blessing to the programmer. Becuse it is difficult to deal with the relationship among objects and properly delegate responsibilities, itt is not uncommon that seasoned programmers misuse objects and create a web of mess. 
-
-If you think of something new that you want to do to an object, with FP, you may simply make another function that's can handle the object. With strictly OOP, you would have to modify or extend the class to give it a new method; and objects carry around methods they might not need once in their lifetime, hence the adage "I need banana; they give chimpanzee holding banana, and whole forest". 
-
-
-Inheritance is cumbersome
-
-objects carry the baggage of their ancestry. 
-
-OOP programmers often desire the ability to modify a class or an instantce on-the-fly, for this one-off edge case, or for debugging. 
+Inheritance is cumbersome, and objects carry the baggage of their ancestry. 
 
 Lacking discipline and caution, the developer will eventually build a wobbly tower of many unnecessary classes. 
 
-OOP also forces you to think abstract things as if tangile, then forces you to classify them these falsly tangible things. Worse, tangibles things to begin with, are already really hard to classify, imagine: 
+OOP also forces you to think abstract things as if tangile, then forces you to classify them; not to mention that tangibles things are already really hard to classify, imagine: 
 
- - You had chairs. Now you have bean bags. 
-   - Are bean bags chairs? 
- - You had bowl. Now you have shipping container. 
-   - Both obviously a "container", but what's common between them that you could abstract away?
- 
+ - You had a chair. Now you have a bean bag. 
+   - Both are seating apparatus.
+   - But is a bean bag a chair?
+ - You had a bowl. Now you have a shipping container. 
+   - Either are obviously a "container"
+   - But what's common between them that you could meaningfully abstract away to the `Container` class?
+
+
+
+`Q7` seeks to address some issues of this nature.
+
 Good object should be constructed with addition: 
  - You have pen, you have apple... 
    - Bam! Apple pen. 
  - You have pen, you have pineapple... 
    - Bam! Pineapple pen.
 
-`Q7` seeks to address some issues of this nature.
 
 Objects should be used primarily as a tiny namespace. 
 
-If you look for "Washington" in the District of Columbia, you will get the nation's capital city. If you lok for "Washington" in the whole United States, you will get a state on the Pacific northwest. 
+If you look for "Washington" in the District of Columbia, you will get the nation's capital city. If you look for "Washington" in the whole United States, you will get a state on the Pacific northwest. 
 If you look for "Fairfax" in Virginia, it will be a county; looked up in the county itself it will be a city; and if taken to Los Angeles, CA, it's a neighborhood. 
 
 Objects are like walls that enclose and area, in which things has unique names. They are tiny namespaces. 
@@ -125,7 +126,7 @@ Before you decide to make anything into an object, think:
  - Can I get by with just "dumb" objects and free functions?
 
 
-With methods bound and domestic to the object, you can just browse from the options available to you. If you type `$`, your options are shown and you can navigte up and down, insteadf of holding everything in your head. 
+With methods bound and domestic to the object, you can just browse from the options available to you. If you type `$`, your options are shown and you can navigte up and down, instead of of holding everything in your head. 
 
 Other benefits are mainly aesthetic and ease of use. 
 
@@ -134,7 +135,7 @@ Composition is a great way to express commonalities between different types.
 
 Another common narrative in classical OOP is "information hiding", which is to make data(fields) private, and define "getters and setters" to read and manipulate the field. 
 
-R is a 
+R is
 
 Who are you hiding it from? Your co-workers, your boss, your client, or yourself? 
 
@@ -224,3 +225,8 @@ motto$charAt(5)
 motto$replaceFirst("\\s", "-")$charAt(5)
 motto
 ```
+
+
+### OOP Overdose
+
+

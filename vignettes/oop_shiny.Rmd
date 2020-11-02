@@ -24,7 +24,6 @@ library(Q7)
 R is a functional programming language. Built with R, the web framework Shiny also employs this paradigm. 
 This document shows one of many ways to employ OO patterns in a Shiny app with Q7 type system. 
 
-
 Each module is an object that has the following members: 
 
  - `id`: constructor parameter, an aribitrary string to represent the whole module

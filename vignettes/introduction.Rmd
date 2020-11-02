@@ -7,7 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r, include =FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -15,17 +15,37 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, include=FALSE}
 library(Q7)
 ```
 
-# Introduction to Q7 Type System
+Q7 type system provides an infrastructure to create objects in R. 
 
-Q7 is a 
+See other vignettes for : 
 
-### API
+ - General discussion of object oriented programming, and why;
+ - Detailed examples;
+ - Difference with `R6`.
+
+
+### Terms and Concepts
+
+Q7 employs conventional OOP terms concepts, with some slight variations:
+
+__object__ - a unit of program and data, may refer to _type_ or _instance_, or both
+
+__type__ - blueprint for an _object_
+
+__instance__ - an embodiment of a _type_
+
+__member__ - things bound to an _object_; some members are functions
+
+__method__ - a function that is bound _and_ (usually) domestic to an object
+
+
+### Basic Interface
 - `type()`
-  - Defines a _type_. (like _class_)
+  - Defines a _type_. 
   - Takes a function or expression as constructor
   - When invoked, the constructor's closure becomes an _instance_, which is an environment
     - Contains every binding inside the closure, except for the arguments
@@ -38,7 +58,7 @@ Q7 is a
     - Ad hoc: A _feature_ can be implemented on a _type_
     - Post hoc: Can also be implemented on an _instance_ 
 - `implement()`
-  - Takes
+  - Takes:
     - object, a _type_ or _instance_
     - any expression (including _features_, but more importantly, an arbitrary expression)
   - Appends the expresseion to the object
@@ -46,25 +66,31 @@ Q7 is a
 Make a type:
 ```{r}
 TypeOne <- type(function(arg1, arg2){
+  var1 <- 3
   add <- function(){
-    arg1 + arg2
+    arg1 + arg2 + var1
   }
 })
 ```
-`type()` takes a function, which is used to construct an instance. 
 
-Everything defined within the function's closure becomes members of the object.
-Arguments supplied to the function are accesible to the closure, but not become members of the object themselves. 
+Everything defined within the function's closure become members of the object. The function's arguments are accesible by bound functions of the object, but not become members themselves.
 ```{r}
 type_one <- TypeOne(1, 2)
 ls(type_one)
+# There's no `arg1` or `arg2` seen
 type_one$add()
+# yet `add()` can see both arguments
 ```
 
 
 ### Reserved Symbols
 
 The following symbols are reserved by the Q7 type system and shall not be re-bound by the user.
+
+Environments: 
+
+ - `.my`: an object's public environment, which the user and other parts of the program interact with
+ - `.private`: an object's private environment, which is parent to the `.my` environment
  
 Binding Modifiers: 
 
@@ -73,23 +99,24 @@ Binding Modifiers:
  - `final`: designates an immutable binding in the public environment
  - `private_final`: designates an immutable binding in the private environment
  - `active`: deisgnates an active binding in the public environment
-
-Environments: 
-
- - `.my`: an object's public environment
- - `.private`: an object's private environment
+ - `active_private`: deisgnates an active binding in the private environment
  
 Functions:
 
- - `initialize`: one that runs at the instantiation of an object
- - `finalize`: one that runs when an object is garbage collected
+ - `initialize`: runs at the instantiation of an object
+ - `finalize`: runs when an object is destroyed by the garbage collector
 
 
-### Making Variants of an Object
+### Make Variants of an Object
 
-With Q7, Objects don't inherit; They grow. The benefit is obvious. When you code with inheritance, your mind must navigate from sub- to super-classes from the inside out; Composition, on the otherhand, can be mentally modeled as linear addition to existing code. 
+There are two main strategies of extending an object: inheritance and composition. Q7 employs composition, and the benefit is obvious.
 
-The object can be modified post-hoc after instantiation. 
+When you code with inheritance, your mind must navigate from sub- to super- classes from the inside out; Composition, on the otherhand, is the linear addition to existing code, which is simpler for the mind to follow.
+
+Types and instances can both be extended in the same manner. The concatenative nature of Q7 makes different objects truly independent from each other.
+
+To extend an object, use `implement()`. If the object is a type, the resulting type must to be bound to a name; if the object is an instance, it is modified in place (see below). Modifying a type will not impact instances already created by the same type.
+
 ```{r}
 type_one %>% implement({
   substract <- function(){
@@ -98,16 +125,18 @@ type_one %>% implement({
 })
 ```
 
-Features can also be packaged with `feature()` for later use. 
+Code can also be packaged with `feature()` for later use. 
 
 ```{r}
-TypeTwo <- type() # we make an empty type
+TypeTwo <- type(function(){
+  n <- 10
+})
 ```
 
 ```{r}
 hasFeatureOne <- feature({
   x <- 1
-  y <- function(n){
+  x_plus_n <- function(){
     x + n
   }
 })
@@ -115,38 +144,41 @@ hasFeatureOne <- feature({
 
 ```{r}
 hasFeatureTwo <- feature({
-  x <- 2 # Overrides x from hasFeatureOne
-  old_y <- y
-  y <- function(n){
-    old_y(n) + 1
+  n <- 100 # Overwrites n from TypeTwo
+  x <- 10 # Overwrites x from hasFeatureOne
+  private[x_plus_n.old] <- x_plus_n 
+    # Rename to preserve the old x_plus_n()
+    # Mark private, because it is only going to be used by the new x_plus_n()
+  x_plus_n <- function(){
+    cat(sprintf("adding x (%i) to n (%i)...\n", x, n)) # do some extra thing
+    x_plus_n.old() # call the old function
   }
 })
 ```
 
 ```{r}
-type_one_with_features <- TypeOne(1,2) %>% 
-  hasFeatureOne() %>% 
-  hasFeatureTwo()
-
 type_two_with_features <- TypeTwo() %>% 
   hasFeatureOne() %>% 
   hasFeatureTwo()
 
-type_one_with_features$old_y(1)
-type_two_with_features$old_y(1)
-type_one_with_features$y(1)
-type_two_with_features$y(1)
+type_two_with_features$x_plus_n()
 ```
 
 
 #### Private Members
-Any domestic founction can read from and write to the private environment. Remember to use the double arrow assignment `<<-` because you want the assignment to pierce the function's closure. Use caution: if the symbol you're assigning to with `<<-` does not exist in either public or private environments, it will end up ouside the object and make a mess.
+Any domestic function of an object can read from and write to the private environment. Remember to use the double arrow - `<<-` - because you want the assignment to pierce the function's closure and reach the object itself. 
+
+Use caution: if the symbol you're assigning to with `<<-` does not exist in either public or private environments of the object, it will end up somewhere ouside the object, sometimes in the global environment.
+
 ```{r}
 Counter <- type(function(){
   private[count] <- 0
   
   add_one <- function(){
-    count <<- count + 1
+    count <<- count + 1 
+    # Your IDE's syntax checker may alert you that 
+    # `count` is not found in scope. 
+    # You can safely ignore this.
   }
   
   get_count <- function(){
@@ -157,7 +189,7 @@ Counter <- type(function(){
 
 ```{r}
 counter <- Counter()
-ls(counter) # count can't be seen from the out side
+ls(counter) # `count` can't be seen from the out side
 
 counter$get_count() # but count can be read by domestic function
 counter$add_one() # ... and be written to
@@ -165,26 +197,21 @@ counter$add_one()
 counter$get_count() # when we read it again the number changes
 ```
 
-##### Get Access to Private Environment
-The private environment (`.private`) is parent of the public environment (`.my`). Parameters supplied to the arguments of the constructor function are implicitly private. When two members in private and public environments have the same name, the one in pulbic will win, and the one in private can only be explicitly qualified with `.private`.
+##### Get Access to the Private Environment
+As stated above, the private environment (`.private`) is parent of the public environment (`.my`). Parameters supplied to the arguments of the constructor function are implicitly private. When two members in private and public environments have the same name, they may co-exist. However, only the one in `.my` will win; the one in `.private` must be explicitly qualified.
 
 The following code allows direct outside access to the `count` object.
 ```{r}
 exposePrivate <- feature({
-  # assigns the .private's reference to itself to .my
-  .my$.private <- .private$.private 
-  #.private <- .private 
-  # also works
+  .my$pvt_env <- .private$.private  # `.private` contains a reference of itself with the same name, assigns it to `.my`
+  #pvt_env <- .private # also works
 })
 
 counter %>% exposePrivate()
 # .private reference appears in the object
 ls(counter, all.names = TRUE)
 counter$.private
-counter$.private$count
+counter$pvt_env$count # It is now possible to directly access any variable in the private environment
 ```
-
-
-
 
 
