@@ -107,7 +107,7 @@ type <- function(x = function(){}, s3 = "Q7default"){
                            "reg.finalizer(.my, finalize, TRUE)",
                            paste0("class(.my) <- c('", s3, "', 'Q7instance')"),
                            paste0("attr(.my, \"s3\") <- \"", s3, "\""),
-                           back_matter,
+                           clean_up_keywords,
                            "return(.my)",
                            "})()",
                            "}"),
@@ -235,7 +235,7 @@ feature_generic <- function(s3, ...){
 feature <- function(expr){
     expr <- deparse(substitute(expr))
     expr <- inject_text(expr,
-                        back_matter,
+                        clean_up_keywords,
                         length(expr) - 1)
     feature_fn <- function(obj = parent.frame()){
         obj_classes <- class(obj)
@@ -277,7 +277,7 @@ feature <- function(expr){
 implement <- function(obj, feat) {
     feat <- deparse(substitute(feat))
     feat <- inject_text(feat,
-                        back_matter,
+                        clean_up_keywords,
                         length(feat) - 1)
     obj_classes <- class(obj)
 
@@ -294,4 +294,4 @@ implement <- function(obj, feat) {
     invisible(structure(obj, class = obj_classes))
 }
 
-back_matter <- c("suppressWarnings(tryCatch(rm(public, private, active, final, private_final, .my), error = function(e){}))")
+clean_up_keywords <- c("suppressWarnings(tryCatch(rm(public, private, active, final, private_final, .my), error = function(e){}))")
