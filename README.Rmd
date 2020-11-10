@@ -19,9 +19,7 @@ knitr::opts_chunk$set(
 [![Travis build status](https://travis-ci.org/iqis/q7.svg?branch=master)](https://travis-ci.org/iqis/q7)
 <!-- badges: end -->
 
-Q7 is a type system that enables a postmodern flavor of compositional object-oriented programming (OOP). 
-
-It is simple, flexible and promotes healthy program design. No more family tree of classes! 
+Q7 is a type system that enables a postmodern flavor of compositional object-oriented programming (OOP). It is simple, flexible and promotes healthy program design. 
   
 Q7 features: 
 
@@ -62,30 +60,3 @@ myAdder$add_nums()
 ```
 
 See vignettes for extending an object and other topics. 
-
-### Features
-
-##### Smart Objects
-  - Contains reference to self: `.my`
-  - Object methods know:
-    - Which object do I belong to? 
-    - Which are other members of the same object? 
-  
-##### Compositional Construction
-  - Freely add, change or delete members, ad or post hoc, without subclassing
-  - Focuses on _has-a_, rather than than _is-a_ relationships 
-  - Objects can contain references to other objects
-
-##### No Magic
-  - All mechanisms are built from basic R constructs 
-    - A _type_ is a function
-    - A _feature_ is a function
-    - An _instance_, created by _type_ and _feature_, is an environment
-  - Same great R syntax & semantics
-    - Perform any action on or within an object 
-    - Normal scoping rules you would expect
-
-__*Origin of the Name__ 
-
-The package was named `foo` for *Freestyle Object
-Orientation*, but the author soon realized the smart-a\*\* name is going to cause confusions. As it is more streamelined than R6, but represents progress in OO philosophy, the author dialed the alphabet down and the numberal up. 

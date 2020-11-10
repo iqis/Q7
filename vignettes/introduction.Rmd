@@ -27,6 +27,29 @@ See other vignettes for :
  - Detailed examples;
  - Difference with `R6`.
 
+
+### Features
+
+##### Smart Objects
+  - Contains reference to self: `.my`
+  - Object methods know:
+    - Which object do I belong to? 
+    - Which are other members of the same object? 
+  
+##### Compositional Construction
+  - Freely add, change or delete members, ad or post hoc, without subclassing
+  - Focuses on _has-a_, rather than than _is-a_ relationships 
+  - Objects can contain references to other objects
+
+##### No Magic
+  - All mechanisms are built from basic R constructs 
+    - A _type_ is a function
+    - A _feature_ is a function
+    - An _instance_, created by _type_ and _feature_, is an environment
+  - Same great R syntax & semantics
+    - Perform any action on or within an object 
+    - Normal scoping rules you would expect
+
 ### Terms and Concepts
 
 Q7 employs conventional OOP terms concepts, with some slight variations:
