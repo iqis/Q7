@@ -8,6 +8,8 @@ print.Q7type <- function(x, ...) {
 print.Q7instance <- function(x, ...){
     if (exists("print", x)) {
         get("print", x)()
+    } else {
+        cat(paste0("<Q7Instance:", attr(x, "s3"), ">", "\n"))
     }
 }
 
