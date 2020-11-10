@@ -19,14 +19,13 @@ knitr::opts_chunk$set(
 library(Q7)
 ```
 
-Q7 type system provides an infrastructure to create objects in R. 
+Q7 type system provides an infrastructure to create objects in R; It is more advanced than native R classes, and is free from the grand narrative of conventional OOP. 
 
 See other vignettes for : 
 
  - General discussion of object oriented programming, and why;
  - Detailed examples;
  - Difference with `R6`.
-
 
 ### Terms and Concepts
 
