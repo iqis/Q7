@@ -1,7 +1,7 @@
 #' Create a Q7 Type
 #'
-#' @param x function or expression; becomes the definition of the obcject
-#' @param s3 S3 class of the object; necessary when using
+#' @param x function or expression; becomes the definition of the object
+#' @param s3 S3 class for the object; necessary when using S3 generic functions
 #'
 #' @return Q7 type; function
 #' @export
