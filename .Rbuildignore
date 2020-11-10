@@ -5,3 +5,5 @@
 ^scratch$
 ^\.travis\.yml$
 ^docs$
+^CRAN-RELEASE$
+^cran-comments\.md$
