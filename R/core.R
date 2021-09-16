@@ -18,80 +18,80 @@
 #' myAdder$add_nums()
 #'
 type <- function(x = function(){}, s3 = "Q7default"){
-        x_char <- deparse(substitute(x))
+    x_char <- deparse(substitute(x))
 
-        if (grepl("function\\(", x_char[1])) { # if x is a function
-            fn <- x # then use x itself
-        } else {
-            fn <- function(){} # or make a new one
-            body(fn) <- substitute(x)
+    if (grepl("function\\(", x_char[1])) { # if x is a function
+        fn <- x # then use x itself
+    } else {
+        fn <- function(){} # or make a new one
+        body(fn) <- substitute(x)
+    }
+
+    keywords <- deparse(quote({
+        public <- structure(NA, class = "public")
+        `[<-.public` <- function(., name, value){
+            name <- deparse(substitute(name))
+            assign(name, value, envir = .my)
+            .
+        }
+        private <- structure(NA, class = "private")
+        `[<-.private` <- function(., name, value){
+            name <- deparse(substitute(name))
+            assign(name, value, envir = .private)
+            .
         }
 
-        keywords <- deparse(quote({
-            public <- structure(NA, class = "public")
-            `[<-.public` <- function(., name, value){
-                name <- deparse(substitute(name))
-                assign(name, value, envir = .my)
-                .
-            }
-            private <- structure(NA, class = "private")
-            `[<-.private` <- function(., name, value){
-                name <- deparse(substitute(name))
-                assign(name, value, envir = .private)
-                .
-            }
+        active <- structure(NA, class = "active")
+        `[<-.active` <- function(., name, value){
+            name <- deparse(substitute(name))
+            `if`(exists(name,
+                        .my,
+                        inherits = FALSE),
+                 rm(list = name,
+                    envir = .my))
+            makeActiveBinding(name, value, .my)
+            .
+        }
 
-            active <- structure(NA, class = "active")
-            `[<-.active` <- function(., name, value){
-                name <- deparse(substitute(name))
-                `if`(exists(name,
-                            .my,
-                            inherits = FALSE),
-                     rm(list = name,
-                        envir = .my))
-                makeActiveBinding(name, value, .my)
-                .
-            }
-
-            private_active <- structure(NA, class = "private_active")
-            `[<-.private_active` <- function(., name, value){
-                name <- deparse(substitute(name))
-                `if`(exists(name,
-                            .private,
-                            inherits = FALSE),
-                     remove(list = name,
+        private_active <- structure(NA, class = "private_active")
+        `[<-.private_active` <- function(., name, value){
+            name <- deparse(substitute(name))
+            `if`(exists(name,
+                        .private,
+                        inherits = FALSE),
+                 remove(list = name,
                         envir = .private))
-                makeActiveBinding(name, value, .private)
-                .
-            }
+            makeActiveBinding(name, value, .private)
+            .
+        }
 
-            final <- structure(NA, class = "final")
-            `[<-.final` <- function(., name, value){
-                name <- deparse(substitute(name))
-                assign(name, value, .my)
-                lockBinding(name, .my)
-                .
-            }
+        final <- structure(NA, class = "final")
+        `[<-.final` <- function(., name, value){
+            name <- deparse(substitute(name))
+            assign(name, value, .my)
+            lockBinding(name, .my)
+            .
+        }
 
-            private_final <- structure(NA, class = "private_final")
-            `[<-.private_final` <- function(., name, value){
-                name <- deparse(substitute(name))
-                assign(name, value, .private)
-                lockBinding(name, .private)
-                .
-            }
-        }))
+        private_final <- structure(NA, class = "private_final")
+        `[<-.private_final` <- function(., name, value){
+            name <- deparse(substitute(name))
+            assign(name, value, .private)
+            lockBinding(name, .private)
+            .
+        }
+    }))
 
-        fn_body <- deparse(body(fn))
-        body(fn) <-
-            parse(text = c("{",
-                           "(function(){",
-                           "assign('.my', environment(), envir = parent.env(environment()))",
-                           "assign('.private', parent.env(.my), envir = parent.env(.my))",
-                           "eval(quote(", keywords, "), envir = .private)",
-                           "private[initialize] <- function(){}",
-                           "private[finalize] <- function(e){}",
-                           "private[print] <- function(){
+    fn_body <- deparse(body(fn))
+    body(fn) <-
+        parse(text = c("{",
+                       "(function(){",
+                       "assign('.my', environment(), envir = parent.env(environment()))",
+                       "assign('.private', parent.env(.my), envir = parent.env(.my))",
+                       "eval(quote(", keywords, "), envir = .private)",
+                       "private[initialize] <- function(){}",
+                       "private[finalize] <- function(e){}",
+                       "private[print] <- function(){
                            cat(paste0(\"<Q7instance:\", attr(.my, \"s3\"), \">\", \"\n\"))
 
     element_name_list <- ls(.my, all.names = TRUE)
@@ -102,20 +102,20 @@ type <- function(x = function(){}, s3 = "Q7default"){
     mapply(print_line, name = element_name_list, class = element_class_list)
     invisible(.my)
                            }",
-                           strip_ends(fn_body),
-                           "initialize()",
-                           "reg.finalizer(.my, finalize, TRUE)",
-                           paste0("class(.my) <- c('", s3, "', 'Q7instance')"),
-                           paste0("attr(.my, \"s3\") <- \"", s3, "\""),
-                           clean_up_keywords,
-                           "return(.my)",
-                           "})()",
-                           "}"),
-                  keep.source = FALSE)
+                       strip_ends(fn_body),
+                       "initialize()",
+                       "reg.finalizer(.my, finalize, TRUE)",
+                       paste0("class(.my) <- c('", s3, "', 'Q7instance')"),
+                       paste0("attr(.my, \"s3\") <- \"", s3, "\""),
+                       clean_up_keywords,
+                       "return(.my)",
+                       "})()",
+                       "}"),
+              keep.source = FALSE)
 
-        structure(fn,
-                  class = c(s3, "Q7type", class(fn)),
-                  s3 = s3)
+    structure(fn,
+              class = c(s3, "Q7type", class(fn)),
+              s3 = s3)
 }
 
 #' Extend a Type upon a (Proto)type
@@ -245,8 +245,8 @@ feature <- function(expr){
             expr <- strip_ends(expr)
             obj_fn_body <- strip_ends(deparse(body(obj)))
             obj_fn_body <- inject_text(text_1 = obj_fn_body,
-                                   text_2 = expr,
-                                   index = length(obj_fn_body) - 9) # number 9 see implement()
+                                       text_2 = expr,
+                                       index = length(obj_fn_body) - 9) # number 9 see implement()
             body(obj) <- parse(text = c("{", obj_fn_body, "}"))
         }
         invisible(structure(obj, class = obj_classes))
