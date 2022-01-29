@@ -4,11 +4,11 @@
 \alias{type}
 \title{Create a Q7 Type}
 \usage{
-type(x = function() {
+type(fn = function() {
 }, s3 = "Q7default")
 }
 \arguments{
-\item{x}{function or expression; becomes the definition of the object}
+\item{fn}{function; becomes the definition of the object}
 
 \item{s3}{S3 class for the object; necessary when using S3 generic functions}
 }

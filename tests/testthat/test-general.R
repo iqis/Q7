@@ -1,10 +1,27 @@
 require(Q7)
 
-test_that("type() can take either function or expression", {
-                TypeOne <- type(function(){var <- 1})
-                TypeTwo <- type({var <- 2})
-                expect_equal(TypeOne()$var, 1)
-                expect_equal(TypeTwo()$var, 2)
+test_that("type() must only take a function", {
+    expect_error(type(1))
+    expect_error(type(quote(1 + 1)))
+    expect_error(type("foo"))
+    expect_error(type(list()))
+    
+    TypeOne <- type(function(){var <- 1})
+    expect_equal(TypeOne()$var, 1)
+})
+
+
+test_that("type() can take a function passed in as an argument", {
+                                        # from iss19
+    type_size <- function(size){ }
+    size <- Q7::type(type_size, s3 = "ggsd.size")
+    x <- size(1)
+    
+    expect_s3_class(x, "ggsd.size")
+
+    one_fn <- function(){var <- 1}
+    TypeOne <- type(one_fn)
+    expect_equal(TypeOne()$var, 1)
 })
 
 test_that("Type & instances have right S3 classes", {
