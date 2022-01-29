@@ -1,10 +1,13 @@
 require(Q7)
 
-test_that("type() can take either function or expression", {
-                TypeOne <- type(function(){var <- 1})
-                TypeTwo <- type({var <- 2})
-                expect_equal(TypeOne()$var, 1)
-                expect_equal(TypeTwo()$var, 2)
+test_that("type() must only take a function", {
+    expect_error(type(1))
+    expect_error(type(quote(1 + 1)))
+    expect_error(type("foo"))
+    expect_error(type(list()))
+    
+    TypeOne <- type(function(){var <- 1})
+    expect_equal(TypeOne()$var, 1)
 })
 
 

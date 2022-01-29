@@ -1,6 +1,6 @@
 #' Create a Q7 Type
 #'
-#' @param x function or expression; becomes the definition of the object
+#' @param fn function; becomes the definition of the object
 #' @param s3 S3 class for the object; necessary when using S3 generic functions
 #'
 #' @return Q7 type; function
@@ -17,14 +17,10 @@
 #' myAdder <- Adder(1, 2)
 #' myAdder$add_nums()
 #'
-type <- function(x = function(){}, s3 = "Q7default"){   
-    x_char <- deparse(substitute(x))
+type <- function(fn = function(){}, s3 = "Q7default"){
 
-    if (grepl("function\\(", x_char[1])) { # if x is a function
-        fn <- x # then use x itself
-    } else {
-        fn <- function(){} # or make a new one
-        body(fn) <- substitute(x)
+    if (!is.function(fn)) {
+        stop("fn must be a function")
     }
 
     keywords <- deparse(quote({
