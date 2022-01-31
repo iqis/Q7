@@ -1,6 +1,6 @@
 Package: Q7
 Title: Types and Features for Object Oriented Programming
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: 
    c(person("Siqi", "Zhang", 
             email = "iqis.gnahz@gmail.com", 
@@ -9,14 +9,16 @@ Authors@R:
      person("Bayer HealthCare", 
             role = c("fnd")))
 Description: 
-    Construct message-passing style objects with types and features. Q7 types uses composition instead of inheritance in creating derived types, allowing definining any code segment as feature and associating any feature to any object. Compared to R6, Q7 is simpler and more flexible, and is mroe friendly in syntax.  
+    Construct message-passing style objects with types and features. Q7 types uses composition instead of inheritance in creating derived types, allowing definining any code segment as feature and associating any feature to any object. Compared to R6, Q7 is simpler, more flexible, and more friendly.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
-Depends: 
+RoxygenNote: 7.1.1
+Depends:
+    R (>= 3.6.0)
+Imports:
     magrittr
-Suggests: 
+Suggests:
     knitr,
     rmarkdown,
     testthat
