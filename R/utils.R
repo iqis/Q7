@@ -181,3 +181,32 @@ merge <- function(inst1, inst2) {
   migrate_fns(parent.env(inst2), parent.env(inst1))
   inst1
 }
+
+
+#' Expose Private Parts of an Instance
+#'
+#' Creates a reference to the private environment inside an object instance
+#'
+#' @param inst instance; <Q7instance>
+#'
+#' @return instance; <Q7instance>
+#' @export
+#'
+#' @examples
+#'
+#' TypeOne <- type(function(arg){
+#'   private[pvt_val] <- 2
+#' })
+#'
+#' instOne <- TypeOne(1)
+#' expose_private(instOne)
+#'
+#' instOne$.private
+#' instOne$.private$pvt_val
+
+expose_private <- function(inst){
+  stopifnot(is_instance(inst))
+
+  inst$.private <- parent.env(inst)
+  inst
+}
