@@ -1,19 +1,18 @@
 Package: Q7
 Title: Types and Features for Object Oriented Programming
 Version: 0.1.0.9000
-Authors@R: 
-   c(person("Siqi", "Zhang", 
-            email = "iqis.gnahz@gmail.com", 
-            role = c("aut", "cre"),
-            comment = c(ORCID = "0000-0003-2617-5776")),
-     person("Bayer HealthCare", 
-            role = c("fnd")))
-Description: 
-    Construct message-passing style objects with types and features. Q7 types uses composition instead of inheritance in creating derived types, allowing definining any code segment as feature and associating any feature to any object. Compared to R6, Q7 is simpler, more flexible, and more friendly.
+Authors@R: c(
+    person("Siqi", "Zhang", , "iqis.gnahz@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-2617-5776")),
+    person("Bayer HealthCare", role = "fnd")
+  )
+Description: Construct message-passing style objects with types and
+    features. Q7 types uses composition instead of inheritance in creating
+    derived types, allowing definining any code segment as feature and
+    associating any feature to any object. Compared to R6, Q7 is simpler,
+    more flexible, and more friendly.
 License: GPL-3
-Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.2.3
+URL: https://iqis.github.io/Q7/, https://github.com/iqis/Q7
 Depends:
     R (>= 3.6.0)
 Imports:
@@ -22,6 +21,8 @@ Suggests:
     knitr,
     rmarkdown,
     testthat
-VignetteBuilder: knitr
-URL: https://iqis.github.io/Q7/,
-    https://github.com/iqis/Q7
+VignetteBuilder: 
+    knitr
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
