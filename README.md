@@ -9,6 +9,8 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![Travis build
 status](https://travis-ci.org/iqis/q7.svg?branch=master)](https://travis-ci.org/iqis/q7)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/Q7)](https://CRAN.R-project.org/package=Q7)
 <!-- badges: end -->
 
 Q7 is a type system that enables a postmodern flavor of compositional
@@ -17,12 +19,12 @@ healthy program design.
 
 Q7 features:
 
-  - `type()`, `feature()` and `implement()` to compose objects;
-  - For each object, `initialize()` and `finalize()` to run at its
-    beginning and end of life;
-  - For each object, `public`, `private`, `final`, `private_final` and
-    `active` binding modifiers to change the visibility and behavior of
-    its members.
+- `type()`, `feature()` and `implement()` to compose objects;
+- For each object, `initialize()` and `finalize()` to run at its
+  beginning and end of life;
+- For each object, `public`, `private`, `final`, `private_final` and
+  `active` binding modifiers to change the visibility and behavior of
+  its members.
 
 ## Installation
 
@@ -34,7 +36,6 @@ devtools::install_github("iqis/Q7")
 ``` r
 require(Q7)
 #> Loading required package: Q7
-#> Loading required package: magrittr
 #> 
 #> Attaching package: 'Q7'
 #> The following object is masked from 'package:base':
@@ -62,7 +63,7 @@ Adder <- type(function(num1, num2){
 myAdder <- Adder(1, 2)
 ```
 
-3, Enjoy\!
+3, Enjoy!
 
 ``` r
 myAdder$add_nums()
