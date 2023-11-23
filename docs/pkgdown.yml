@@ -1,8 +1,0 @@
-pandoc: 2.7.2
-pkgdown: 1.4.1
-pkgdown_sha: ~
-articles:
-  examples: examples.html
-  introduction: introduction.html
-  versus_r6: versus_r6.html
-
