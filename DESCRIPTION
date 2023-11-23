@@ -23,4 +23,5 @@ Suggests:
     rmarkdown,
     testthat
 VignetteBuilder: knitr
-URL: https://henninglorenzen-ext-bayer.github.io/Q7/
+URL: https://henninglorenzen-ext-bayer.github.io/Q7/,
+    https://github.com/iqis/Q7
