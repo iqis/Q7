@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![Travis build status](https://travis-ci.org/iqis/q7.svg?branch=master)](https://travis-ci.org/iqis/q7)
+[![CRAN status](https://www.r-pkg.org/badges/version/Q7)](https://CRAN.R-project.org/package=Q7)
 <!-- badges: end -->
 
 Q7 is a type system that enables a postmodern flavor of compositional object-oriented programming (OOP). It is simple, flexible and promotes healthy program design. 

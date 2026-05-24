@@ -4,8 +4,11 @@
 \alias{type}
 \title{Create a Q7 Type}
 \usage{
-type(fn = function() {
-}, s3 = "Q7default")
+type(
+  fn = function() {
+ },
+  s3 = "Q7default"
+)
 }
 \arguments{
 \item{fn}{function; becomes the definition of the object}
